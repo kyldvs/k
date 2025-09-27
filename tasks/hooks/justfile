@@ -19,6 +19,25 @@ pre-commit:
 
 [no-cd]
 lint-staged *files:
-  @echo "Running lint-staged tasks on files:"
-  @echo "{{files}}"
-  @echo "Files processed successfully"
+  just hooks _ensure-newlines {{files}}
+
+[no-cd]
+_ensure-newlines *files:
+  #!/usr/bin/env bash
+  blocklist=("png" "jpg" "jpeg" "gif" "ico" "svg" "woff" "woff2" "ttf" "eot" "mp4" "mp3" "wav" "pdf" "zip" "tar" "gz")
+  for file in {{files}}; do
+    if [[ -f "$file" ]]; then
+      ext="${file##*.}"
+      ext="${ext,,}"
+      blocked=false
+      for blocked_ext in "${blocklist[@]}"; do
+        if [[ "$ext" == "$blocked_ext" ]]; then
+          blocked=true
+          break
+        fi
+      done
+      if [[ "$blocked" == false ]] && [[ -n "$(tail -c1 "$file" 2>/dev/null)" ]]; then
+        echo "" >> "$file"
+      fi
+    fi
+  done
