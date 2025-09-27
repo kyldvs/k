@@ -1,0 +1,15 @@
+{
+  "name": "@kyldvs/k",
+  "version": "0.0.0",
+  "description": "dotfiles",
+  "license": "MIT",
+  "packageManager": "pnpm@10.17.1",
+  "devDependencies": {
+    "@commitlint/config-conventional": "^19.8.1",
+    "commitlint": "^19.8.1",
+    "husky": "^9.1.7"
+  },
+  "scripts": {
+    "prepare": "husky"
+  }
+}
