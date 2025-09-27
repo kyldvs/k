@@ -3,22 +3,31 @@ set shell := ["bash", "-uc"]
 set ignore-comments
 
 [no-cd]
-help:
-  @just -f tasks/hooks/justfile --list
+@help:
+  just -f tasks/hooks/justfile --list
 
 [no-cd]
-_default: help
+@_default: help
 
 [no-cd]
-commit-msg message:
+@commit-msg message:
   pnpm exec commitlint --edit {{message}}
 
 [no-cd]
-pre-commit:
+@pre-commit:
   pnpm exec lint-staged
 
 [no-cd]
-lint-staged *files:
+@lint-staged *files:
+  just hooks lint-files {{files}}
+
+[no-cd]
+lint-tracked:
+  #!/usr/bin/env bash
+  git ls-files -z | xargs -0 just hooks lint-files
+
+[no-cd]
+@lint-files *files:
   just hooks _ensure-newlines {{files}}
 
 [no-cd]

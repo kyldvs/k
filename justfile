@@ -2,11 +2,11 @@ set fallback := true
 set shell := ["bash", "-uc"]
 set ignore-comments
 
-_default:
-  @just --list
+@_default:
+  just --list
 
-help:
-  @just --list
+@help:
+  just --list
 
 mod hooks "tasks/hooks"
 
@@ -19,12 +19,12 @@ home_dir := env_var('HOME')
   just _check_program cat
   just _check_program grep
 
-install:
-  @just _check_install
+@install:
+  just _check_install
   echo "Install recipes go here"
 
-link:
+@link:
   echo "Link dotfiles to home directory"
 
-fonts:
+@fonts:
   echo "Install fonts"
