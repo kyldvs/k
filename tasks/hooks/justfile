@@ -1,0 +1,24 @@
+set fallback := true
+set shell := ["bash", "-uc"]
+set ignore-comments
+
+[no-cd]
+help:
+  @just -f tasks/hooks/justfile --list
+
+[no-cd]
+_default: help
+
+[no-cd]
+commit-msg message:
+  pnpm exec commitlint --edit {{message}}
+
+[no-cd]
+pre-commit:
+  pnpm exec lint-staged
+
+[no-cd]
+lint-staged *files:
+  @echo "Running lint-staged tasks on files:"
+  @echo "{{files}}"
+  @echo "Files processed successfully"

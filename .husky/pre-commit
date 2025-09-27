@@ -1,1 +1,1 @@
-echo "pre-commit hook"
+just hooks pre-commit

@@ -7,9 +7,13 @@
   "devDependencies": {
     "@commitlint/config-conventional": "^19.8.1",
     "commitlint": "^19.8.1",
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.1"
   },
   "scripts": {
     "prepare": "husky"
+  },
+  "lint-staged": {
+    "*": "just hooks lint-staged"
   }
 }

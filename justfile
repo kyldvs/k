@@ -8,6 +8,8 @@ _default:
 help:
   @just --list
 
+mod hooks "tasks/hooks"
+
 home_dir := env_var('HOME')
 
 @_check_program name:
