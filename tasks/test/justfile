@@ -3,8 +3,18 @@ set shell := ["bash", "-uc"]
 
 [no-cd]
 all:
-  @echo "Running all tests..."
-  @cd src/tests && ./run.sh termux
+  #!/usr/bin/env bash
+  set -euo pipefail
+
+  echo "Running all tests..."
+  for config_file in src/bootstrap/*.json; do
+    if [ -f "$config_file" ]; then
+      config_name=$(basename "$config_file" .json)
+      echo "Testing $config_name..."
+      cd src/tests && ./run.sh "$config_name"
+      cd ../..
+    fi
+  done
 
 [no-cd]
 config name environment="termux":

@@ -3,7 +3,19 @@ set shell := ["bash", "-uc"]
 set ignore-comments
 
 [no-cd]
-build config_name:
+build:
+  #!/usr/bin/env bash
+  set -euo pipefail
+
+  for config_file in src/bootstrap/*.json; do
+    if [ -f "$config_file" ]; then
+      config_name=$(basename "$config_file" .json)
+      just bootstrap build-one "$config_name"
+    fi
+  done
+
+[no-cd]
+build-one config_name:
   #!/usr/bin/env bash
   set -euo pipefail
 
