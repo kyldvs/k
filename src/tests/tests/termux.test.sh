@@ -88,10 +88,57 @@ if [ ! -x "/data/data/com.termux/files/usr/bin/nerdfetch" ]; then
 fi
 echo "✓ nerdfetch is executable"
 
-# Test 6: Idempotency test - run again
+# Test 6: Check proot-distro installation
+echo "→ Testing proot-distro installation"
+if ! command -v proot-distro >/dev/null 2>&1; then
+    echo "✗ FAIL: proot-distro command not found"
+    exit 1
+fi
+echo "✓ proot-distro is installed"
+
+# Test 7: Check Alpine distro installation
+echo "→ Testing Alpine distro installation"
+if ! ls -la /data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/ | grep -q "alpine"; then
+    echo "✗ FAIL: Alpine distro not installed"
+    echo "Installed distributions:"
+    ls -la /data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/ 2>/dev/null || true
+    proot-distro list 2>/dev/null || true
+    exit 1
+fi
+echo "✓ Alpine distro is installed"
+
+# Test 8: Check doppler wrapper
+echo "→ Testing doppler wrapper"
+assert_file "$HOME/bin/doppler"
+if [ ! -x "$HOME/bin/doppler" ]; then
+    echo "✗ FAIL: doppler wrapper is not executable"
+    exit 1
+fi
+echo "✓ doppler wrapper is executable"
+
+# Test 9: Check doppler in Alpine
+echo "→ Testing doppler in Alpine"
+if ! proot-distro login alpine -- command -v doppler >/dev/null 2>&1; then
+    echo "✗ FAIL: doppler not found in Alpine"
+    exit 1
+fi
+echo "✓ doppler is installed in Alpine"
+
+# Test 10: Test doppler wrapper functionality
+echo "→ Testing doppler wrapper functionality"
+export PATH="$HOME/bin:$PATH"
+output=$(doppler 2>&1 || true)
+if [[ "$output" != *"hello doppler"* ]]; then
+    echo "✗ FAIL: doppler wrapper output incorrect: $output"
+    exit 1
+fi
+echo "✓ doppler wrapper works correctly"
+
+# Test 11: Idempotency test - run again
 echo "→ Testing idempotency (running script again)"
 curl -fsSL http://k.local/termux.sh | bash
 assert_file "$HOME/bin/sudo"
 assert_symlink "$HOME/bin/sudo" "$HOME/fake-sudo/sudo"
+assert_file "$HOME/bin/doppler"
 
 echo "✓ All termux bootstrap tests passed"

@@ -1,5 +1,5 @@
 _needs_proot_distro_alpine() {
-    ! proot-distro list --installed 2>/dev/null | grep -q "alpine"
+    [ ! -d "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/alpine" ]
 }
 
 _proot_distro_alpine() {

@@ -315,13 +315,14 @@ _proot_distro() {
 }
 
 _proot_distro
+
 #--- /proot-distro ---#
 
 
 #--- proot-distro-alpine ---#
 
 _needs_proot_distro_alpine() {
-    ! proot-distro list --installed 2>/dev/null | grep -q "alpine"
+    [ ! -d "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/alpine" ]
 }
 
 _proot_distro_alpine() {
@@ -348,6 +349,7 @@ _proot_distro_alpine() {
 }
 
 _proot_distro_alpine
+
 #--- /proot-distro-alpine ---#
 
 
@@ -385,6 +387,7 @@ _proot_distro_doppler() {
 }
 
 _proot_distro_doppler
+
 #--- /proot-distro-doppler ---#
 
 
@@ -431,5 +434,6 @@ EOF
 }
 
 _doppler
+
 #--- /doppler ---#
 
