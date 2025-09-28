@@ -54,5 +54,20 @@ Modular bootstrap system for compiling reusable setup scripts.
 - Use tilde paths (`~/file`) not `$HOME`
 - Step names use dash format (`"fake-sudo"`)
 
+## Testing System
+
+Docker-based testing simulates real curl install of bootstrap scripts.
+
+### Structure
+- `src/tests/`: Docker images, test runner, test assertions
+- Run: `just test config <name>` (e.g., `just test config termux`)
+- Clean: `just test clean`
+
+### Key Points
+- Uses Python HTTP server (simpler than nginx)
+- Symlinks in scripts use absolute paths (`$HOME/target`)
+- Docker: ensure testuser owns home directory
+- Tests check idempotency (run twice, no errors)
+
 ## Planning
 - When planning features, include "commit and push" as final steps
