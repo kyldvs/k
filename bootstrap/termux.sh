@@ -100,7 +100,7 @@ _util_functions() {
 
         printf "%s→%s %s%s%s" "$KD_CYAN" "$KD_RESET" "$KD_CYAN" "$step_name" "$KD_RESET"
         if [ -n "$message" ]; then
-            printf ": %s%s%s" "$KD_GRAY" "$message" "$KD_RESET"
+            printf ": %s" "$message"
         fi
         printf "\n"
 
@@ -127,7 +127,7 @@ _util_functions() {
 
         printf "  %s○%s %sskipping%s" "$KD_GRAY" "$KD_RESET" "$KD_GRAY" "$KD_RESET"
         if [ -n "$reason" ]; then
-            printf " %s(%s)%s" "$KD_GRAY" "$reason" "$KD_RESET"
+            printf " %s(%s%s%s)%s" "$KD_GRAY" "$KD_RESET" "$reason" "$KD_GRAY" "$KD_RESET"
         fi
         printf "\n"
         KD_CURRENT_STEP=""
