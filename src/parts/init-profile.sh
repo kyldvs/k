@@ -5,7 +5,7 @@ _needs_profile_init() {
 
 _init_profile() {
     if ! _needs_profile_init; then
-        kd_step_skip "init-profile" "$HOME/.profile already exists"
+        kd_step_skip "init-profile" "~/.profile already exists"
         return 0
     fi
 
@@ -15,7 +15,7 @@ _init_profile() {
 # POSIX compliant profile with common setup
 EOF
 
-    kd_step_end "created successfully"
+    kd_step_end
 }
 
 _init_profile

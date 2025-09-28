@@ -6,14 +6,14 @@ _needs_fake_sudo() {
 _fake_sudo() {
     # Create fake sudo command for Termux in home/bin
     if ! _needs_fake_sudo; then
-        kd_step_skip "fake-sudo" "$HOME/bin/sudo already exists"
+        kd_step_skip "fake-sudo" "~/bin/sudo already exists"
         return 0
     fi
 
     kd_step_start "fake-sudo" "Setting up for Termux"
 
     # Create bin directory if it doesn't exist
-    kd_log "Creating $HOME/bin directory"
+    kd_log "Creating ~/bin directory"
     mkdir -p "$HOME/bin"
 
     # Create fake-sudo directory and script
@@ -31,7 +31,7 @@ EOF
     # Create symlink in bin
     ln -sf "$HOME/fake-sudo/sudo" "$HOME/bin/sudo"
 
-    kd_step_end "installed successfully"
+    kd_step_end
 }
 
 _fake_sudo

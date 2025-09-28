@@ -4,8 +4,8 @@ _needs_util_functions() {
 }
 
 _util_functions() {
-    # POSIX compliant color definitions - check for color support
-    if [ -t 1 ] || [ "${KD_COLOR:-auto}" = "always" ] || [ -n "$TERMUX_VERSION" ]; then
+    # POSIX compliant color definitions - always enable unless KD_NO_COLOR is set
+    if [ -z "$KD_NO_COLOR" ]; then
         # Use printf to generate actual escape characters
         KD_RED=$(printf '\033[31m')
         KD_GREEN=$(printf '\033[32m')
@@ -13,6 +13,7 @@ _util_functions() {
         KD_BLUE=$(printf '\033[34m')
         KD_CYAN=$(printf '\033[36m')
         KD_GRAY=$(printf '\033[90m')
+        KD_WHITE=$(printf '\033[97m')
         KD_RESET=$(printf '\033[0m')
         KD_BOLD=$(printf '\033[1m')
     else
@@ -22,6 +23,7 @@ _util_functions() {
         KD_BLUE=''
         KD_CYAN=''
         KD_GRAY=''
+        KD_WHITE=''
         KD_RESET=''
         KD_BOLD=''
     fi
@@ -88,9 +90,9 @@ _util_functions() {
 
         KD_CURRENT_STEP="$step_name"
 
-        printf "%s▶%s %s%s%s" "$KD_CYAN" "$KD_RESET" "$KD_BOLD" "$step_name" "$KD_RESET"
+        printf "%s▶%s %s%s%s" "$KD_CYAN" "$KD_RESET" "$KD_CYAN" "$step_name" "$KD_RESET"
         if [ -n "$message" ]; then
-            printf ": %s" "$message"
+            printf ": %s%s%s" "$KD_GRAY" "$message" "$KD_RESET"
         fi
         printf "\n"
 
@@ -98,18 +100,12 @@ _util_functions() {
     }
 
     kd_step_end() {
-        local message="$*"
-
         if [ $KD_INDENT -gt 0 ]; then
             KD_INDENT=$((KD_INDENT - 1))
         fi
 
         if [ -n "$KD_CURRENT_STEP" ]; then
-            printf "%s✓%s %s" "$KD_GREEN" "$KD_RESET" "$KD_CURRENT_STEP"
-            if [ -n "$message" ]; then
-                printf ": %s" "$message"
-            fi
-            printf "\n"
+            printf "%s✓%s %sdone%s\n" "$KD_GREEN" "$KD_RESET" "$KD_GREEN" "$KD_RESET"
             KD_CURRENT_STEP=""
         fi
     }
@@ -119,7 +115,7 @@ _util_functions() {
         shift
         local reason="$*"
 
-        printf "%s-%s %s%s%s" "$KD_GRAY" "$KD_RESET" "$KD_GRAY" "$step_name" "$KD_RESET"
+        printf "  %s-%s %s%s%s" "$KD_GRAY" "$KD_RESET" "$KD_GRAY" "$step_name" "$KD_RESET"
         if [ -n "$reason" ]; then
             printf ": %s" "$reason"
         fi

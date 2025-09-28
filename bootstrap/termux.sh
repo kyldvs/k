@@ -12,8 +12,8 @@ _needs_util_functions() {
 }
 
 _util_functions() {
-    # POSIX compliant color definitions - check for color support
-    if [ -t 1 ] || [ "${KD_COLOR:-auto}" = "always" ] || [ -n "$TERMUX_VERSION" ]; then
+    # POSIX compliant color definitions - always enable unless KD_NO_COLOR is set
+    if [ -z "$KD_NO_COLOR" ]; then
         # Use printf to generate actual escape characters
         KD_RED=$(printf '\033[31m')
         KD_GREEN=$(printf '\033[32m')
@@ -21,6 +21,7 @@ _util_functions() {
         KD_BLUE=$(printf '\033[34m')
         KD_CYAN=$(printf '\033[36m')
         KD_GRAY=$(printf '\033[90m')
+        KD_WHITE=$(printf '\033[97m')
         KD_RESET=$(printf '\033[0m')
         KD_BOLD=$(printf '\033[1m')
     else
@@ -30,6 +31,7 @@ _util_functions() {
         KD_BLUE=''
         KD_CYAN=''
         KD_GRAY=''
+        KD_WHITE=''
         KD_RESET=''
         KD_BOLD=''
     fi
@@ -96,9 +98,9 @@ _util_functions() {
 
         KD_CURRENT_STEP="$step_name"
 
-        printf "%s▶%s %s%s%s" "$KD_CYAN" "$KD_RESET" "$KD_BOLD" "$step_name" "$KD_RESET"
+        printf "%s▶%s %s%s%s" "$KD_CYAN" "$KD_RESET" "$KD_CYAN" "$step_name" "$KD_RESET"
         if [ -n "$message" ]; then
-            printf ": %s" "$message"
+            printf ": %s%s%s" "$KD_GRAY" "$message" "$KD_RESET"
         fi
         printf "\n"
 
@@ -106,18 +108,12 @@ _util_functions() {
     }
 
     kd_step_end() {
-        local message="$*"
-
         if [ $KD_INDENT -gt 0 ]; then
             KD_INDENT=$((KD_INDENT - 1))
         fi
 
         if [ -n "$KD_CURRENT_STEP" ]; then
-            printf "%s✓%s %s" "$KD_GREEN" "$KD_RESET" "$KD_CURRENT_STEP"
-            if [ -n "$message" ]; then
-                printf ": %s" "$message"
-            fi
-            printf "\n"
+            printf "%s✓%s %sdone%s\n" "$KD_GREEN" "$KD_RESET" "$KD_GREEN" "$KD_RESET"
             KD_CURRENT_STEP=""
         fi
     }
@@ -127,7 +123,7 @@ _util_functions() {
         shift
         local reason="$*"
 
-        printf "%s-%s %s%s%s" "$KD_GRAY" "$KD_RESET" "$KD_GRAY" "$step_name" "$KD_RESET"
+        printf "  %s-%s %s%s%s" "$KD_GRAY" "$KD_RESET" "$KD_GRAY" "$step_name" "$KD_RESET"
         if [ -n "$reason" ]; then
             printf ": %s" "$reason"
         fi
@@ -150,14 +146,14 @@ _needs_fake_sudo() {
 _fake_sudo() {
     # Create fake sudo command for Termux in home/bin
     if ! _needs_fake_sudo; then
-        kd_step_skip "fake-sudo" "$HOME/bin/sudo already exists"
+        kd_step_skip "fake-sudo" "~/bin/sudo already exists"
         return 0
     fi
 
     kd_step_start "fake-sudo" "Setting up for Termux"
 
     # Create bin directory if it doesn't exist
-    kd_log "Creating $HOME/bin directory"
+    kd_log "Creating ~/bin directory"
     mkdir -p "$HOME/bin"
 
     # Create fake-sudo directory and script
@@ -175,7 +171,7 @@ EOF
     # Create symlink in bin
     ln -sf "$HOME/fake-sudo/sudo" "$HOME/bin/sudo"
 
-    kd_step_end "installed successfully"
+    kd_step_end
 }
 
 _fake_sudo
@@ -192,7 +188,7 @@ _needs_profile_init() {
 
 _init_profile() {
     if ! _needs_profile_init; then
-        kd_step_skip "init-profile" "$HOME/.profile already exists"
+        kd_step_skip "init-profile" "~/.profile already exists"
         return 0
     fi
 
@@ -202,7 +198,7 @@ _init_profile() {
 # POSIX compliant profile with common setup
 EOF
 
-    kd_step_end "created successfully"
+    kd_step_end
 }
 
 _init_profile
