@@ -1,7 +1,7 @@
 # TODO
 
-- [ ] compile reusable modularized components into bootstrap scripts
-- [ ] termux fake sudo setup
+- [x] compile reusable modularized components into bootstrap scripts
+- [x] termux fake sudo setup
 - [ ] termux keyboard shortcut settings
 - [ ] termux profile
 - [ ] termux proot alpine

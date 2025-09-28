@@ -3,7 +3,9 @@
 # Generated bootstrap script
 # Do not edit directly - edit parts and rebuild
 #
+
 #--- fake-sudo ---#
+
 _fake_sudo() {
     # Create fake sudo command for Termux in home/bin
     echo "Setting up fake sudo for Termux..."
@@ -34,5 +36,7 @@ EOF
     echo "Fake sudo installed successfully"
 }
 
-_fake_sudo#--- /fake-sudo ---#
+_fake_sudo
+
+#--- /fake-sudo ---#
 

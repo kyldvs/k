@@ -27,8 +27,11 @@ build config_name:
       exit 1
     fi
 
+    echo "" >> "$output_file"
     echo "#--- ${part} ---#" >> "$output_file"
+    echo "" >> "$output_file"
     cat "$part_file" >> "$output_file"
+    echo "" >> "$output_file"
     echo "#--- /${part} ---#" >> "$output_file"
     echo "" >> "$output_file"
   done < <(jq -r ".parts[]" "$config_file")
