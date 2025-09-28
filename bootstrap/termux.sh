@@ -56,23 +56,18 @@ _init_profile() {
     echo "Setting up .profile..."
 
     if ! _needs_profile_init; then
-        printf "Y/n to overwrite ~/.profile? "
-        read -r response
-        case "$response" in
-            [Yy]|"") ;;
-            *) echo "Skipping .profile creation"; return 0 ;;
-        esac
+        echo "$HOME/.profile exists, skipping"
+        return 0
     fi
 
     cat > "$HOME/.profile" << 'EOF'
-# Generated profile for shell configuration
-
-export EDITOR=nano
+# POSIX compliant profile with common setup
 EOF
 
     echo ".profile created successfully"
 }
 
 _init_profile
+
 #--- /init-profile ---#
 
