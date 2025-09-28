@@ -82,17 +82,12 @@ _util_functions() {
         [ -f /etc/os-release ] && grep -q "Ubuntu" /etc/os-release
     }
 
-    kd_is_macos() {
-        [ "$(uname -s)" = "Darwin" ]
-    }
 
     kd_get_platform() {
         if kd_is_termux; then
             echo "termux"
         elif kd_is_ubuntu; then
             echo "ubuntu"
-        elif kd_is_macos; then
-            echo "macos"
         else
             echo "unknown"
         fi
@@ -111,11 +106,6 @@ _util_functions() {
         fi
     }
 
-    _for_macos() {
-        if kd_is_macos; then
-            "$@"
-        fi
-    }
 
     # Step functions
     KD_CURRENT_STEP=""
@@ -254,9 +244,6 @@ _nerdfetch_ubuntu() {
     return 0
 }
 
-_nerdfetch_macos() {
-    return 0
-}
 
 _nerdfetch() {
     kd_step_start "nerdfetch" "Installing nerdfetch"
@@ -271,7 +258,7 @@ _nerdfetch() {
         termux)
             _nerdfetch_termux
             ;;
-        ubuntu|macos|*)
+        ubuntu|*)
             kd_step_skip "platform $platform not supported"
             return 0
             ;;
@@ -305,15 +292,6 @@ _mosh_ubuntu() {
     fi
 }
 
-_mosh_macos() {
-    kd_log "Installing mosh for macOS"
-    if command -v brew >/dev/null 2>&1; then
-        brew install mosh
-    else
-        kd_step_skip "Homebrew not available"
-        return 0
-    fi
-}
 
 _mosh() {
     kd_step_start "mosh" "Installing mosh"
@@ -331,9 +309,6 @@ _mosh() {
         ubuntu)
             _mosh_ubuntu
             ;;
-        macos)
-            _mosh_macos
-            ;;
         *)
             kd_step_skip "platform $platform not supported"
             return 0
@@ -344,6 +319,7 @@ _mosh() {
 }
 
 _mosh
+
 #--- /mosh ---#
 
 
@@ -367,7 +343,7 @@ _proot_distro() {
             kd_log "Installing proot-distro"
             pkg install -y proot-distro
             ;;
-        ubuntu|macos|*)
+        ubuntu|*)
             kd_step_skip "platform $platform not supported"
             return 0
             ;;
@@ -401,7 +377,7 @@ _proot_distro_alpine() {
             kd_log "Installing Alpine Linux via proot-distro"
             proot-distro install alpine
             ;;
-        ubuntu|macos|*)
+        ubuntu|*)
             kd_step_skip "platform $platform not supported"
             return 0
             ;;
@@ -439,7 +415,7 @@ _proot_distro_doppler() {
                 apk add doppler
             '
             ;;
-        ubuntu|macos|*)
+        ubuntu|*)
             kd_step_skip "platform $platform not supported"
             return 0
             ;;
@@ -486,7 +462,7 @@ EOF
 
             chmod +x "$HOME/bin/doppler"
             ;;
-        ubuntu|macos|*)
+        ubuntu|*)
             kd_step_skip "platform $platform not supported"
             return 0
             ;;
@@ -516,7 +492,7 @@ _termux_next_steps() {
             printf "   Run %sdoppler login%s to authenticate with Doppler\n" "$KD_CYAN" "$KD_RESET"
             printf "   Then continue with your bootstrap process\n"
             ;;
-        ubuntu|macos|*)
+        ubuntu|*)
             # Do nothing for other platforms
             return 0
             ;;

@@ -74,17 +74,12 @@ _util_functions() {
         [ -f /etc/os-release ] && grep -q "Ubuntu" /etc/os-release
     }
 
-    kd_is_macos() {
-        [ "$(uname -s)" = "Darwin" ]
-    }
 
     kd_get_platform() {
         if kd_is_termux; then
             echo "termux"
         elif kd_is_ubuntu; then
             echo "ubuntu"
-        elif kd_is_macos; then
-            echo "macos"
         else
             echo "unknown"
         fi
@@ -103,11 +98,6 @@ _util_functions() {
         fi
     }
 
-    _for_macos() {
-        if kd_is_macos; then
-            "$@"
-        fi
-    }
 
     # Step functions
     KD_CURRENT_STEP=""

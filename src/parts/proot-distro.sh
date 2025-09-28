@@ -16,7 +16,7 @@ _proot_distro() {
             kd_log "Installing proot-distro"
             pkg install -y proot-distro
             ;;
-        ubuntu|macos|*)
+        ubuntu|*)
             kd_step_skip "platform $platform not supported"
             return 0
             ;;

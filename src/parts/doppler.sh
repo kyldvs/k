@@ -29,7 +29,7 @@ EOF
 
             chmod +x "$HOME/bin/doppler"
             ;;
-        ubuntu|macos|*)
+        ubuntu|*)
             kd_step_skip "platform $platform not supported"
             return 0
             ;;

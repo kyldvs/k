@@ -16,15 +16,6 @@ _mosh_ubuntu() {
     fi
 }
 
-_mosh_macos() {
-    kd_log "Installing mosh for macOS"
-    if command -v brew >/dev/null 2>&1; then
-        brew install mosh
-    else
-        kd_step_skip "Homebrew not available"
-        return 0
-    fi
-}
 
 _mosh() {
     kd_step_start "mosh" "Installing mosh"
@@ -41,9 +32,6 @@ _mosh() {
             ;;
         ubuntu)
             _mosh_ubuntu
-            ;;
-        macos)
-            _mosh_macos
             ;;
         *)
             kd_step_skip "platform $platform not supported"

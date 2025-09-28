@@ -82,17 +82,12 @@ _util_functions() {
         [ -f /etc/os-release ] && grep -q "Ubuntu" /etc/os-release
     }
 
-    kd_is_macos() {
-        [ "$(uname -s)" = "Darwin" ]
-    }
 
     kd_get_platform() {
         if kd_is_termux; then
             echo "termux"
         elif kd_is_ubuntu; then
             echo "ubuntu"
-        elif kd_is_macos; then
-            echo "macos"
         else
             echo "unknown"
         fi
@@ -111,11 +106,6 @@ _util_functions() {
         fi
     }
 
-    _for_macos() {
-        if kd_is_macos; then
-            "$@"
-        fi
-    }
 
     # Step functions
     KD_CURRENT_STEP=""
@@ -258,15 +248,6 @@ _mosh_ubuntu() {
     fi
 }
 
-_mosh_macos() {
-    kd_log "Installing mosh for macOS"
-    if command -v brew >/dev/null 2>&1; then
-        brew install mosh
-    else
-        kd_step_skip "Homebrew not available"
-        return 0
-    fi
-}
 
 _mosh() {
     kd_step_start "mosh" "Installing mosh"
@@ -284,9 +265,6 @@ _mosh() {
         ubuntu)
             _mosh_ubuntu
             ;;
-        macos)
-            _mosh_macos
-            ;;
         *)
             kd_step_skip "platform $platform not supported"
             return 0
@@ -297,5 +275,6 @@ _mosh() {
 }
 
 _mosh
+
 #--- /mosh ---#
 

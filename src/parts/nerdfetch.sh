@@ -12,9 +12,6 @@ _nerdfetch_ubuntu() {
     return 0
 }
 
-_nerdfetch_macos() {
-    return 0
-}
 
 _nerdfetch() {
     kd_step_start "nerdfetch" "Installing nerdfetch"
@@ -29,7 +26,7 @@ _nerdfetch() {
         termux)
             _nerdfetch_termux
             ;;
-        ubuntu|macos|*)
+        ubuntu|*)
             kd_step_skip "platform $platform not supported"
             return 0
             ;;

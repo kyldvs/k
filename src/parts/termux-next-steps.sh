@@ -12,7 +12,7 @@ _termux_next_steps() {
             printf "   Run %sdoppler login%s to authenticate with Doppler\n" "$KD_CYAN" "$KD_RESET"
             printf "   Then continue with your bootstrap process\n"
             ;;
-        ubuntu|macos|*)
+        ubuntu|*)
             # Do nothing for other platforms
             return 0
             ;;

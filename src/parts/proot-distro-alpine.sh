@@ -16,7 +16,7 @@ _proot_distro_alpine() {
             kd_log "Installing Alpine Linux via proot-distro"
             proot-distro install alpine
             ;;
-        ubuntu|macos|*)
+        ubuntu|*)
             kd_step_skip "platform $platform not supported"
             return 0
             ;;
