@@ -23,3 +23,23 @@ This is the dotfiles repo for kyldvs.
 - All recipes: use `[no-cd]` attribute
 - No echo by default: prefix recipe with `@`
 - Bash recipes (with `#!/usr/bin/env bash`): no `@` prefix (`@` reverses behavior)
+
+## Bootstrap System
+
+Modular bootstrap system for compiling reusable setup scripts.
+
+### Structure
+- `src/parts/*.sh`: Individual setup components (functions)
+- `src/bootstrap/*.json`: Configuration files specifying which parts to include
+- `tasks/bootstrap/`: Build system and templates
+- `bootstrap/*.sh`: Generated output scripts (do not edit manually)
+
+### Adding New Parts
+1. Create `src/parts/part-name.sh` with function `_part_name()`
+2. Use `return` not `exit` inside functions (compiled script context)
+3. Add part name to relevant JSON config in `src/bootstrap/`
+4. Rebuild with `just bootstrap build <config>`
+
+### Commands
+- `just bootstrap build termux` - Build termux.sh from termux.json
+- Parts are fenced with `#--- part-name ---#` markers in output
