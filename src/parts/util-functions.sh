@@ -90,7 +90,7 @@ _util_functions() {
 
         KD_CURRENT_STEP="$step_name"
 
-        printf "%s▶%s %s%s%s" "$KD_CYAN" "$KD_RESET" "$KD_CYAN" "$step_name" "$KD_RESET"
+        printf "%s→%s %s%s%s" "$KD_CYAN" "$KD_RESET" "$KD_CYAN" "$step_name" "$KD_RESET"
         if [ -n "$message" ]; then
             printf ": %s%s%s" "$KD_GRAY" "$message" "$KD_RESET"
         fi
