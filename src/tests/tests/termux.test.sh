@@ -59,9 +59,15 @@ assert_file_contains() {
     echo "✓ File contains pattern: $file"
 }
 
-# Test 1: Run the bootstrap script via curl
-echo "→ Running bootstrap script via curl"
-curl -fsSL http://k.local/termux.sh | bash
+# Test 1: Run the bootstrap script
+echo "→ Running bootstrap script"
+if [ -f /tmp/bootstrap.sh ]; then
+    # Direct execution for Termux test
+    bash /tmp/bootstrap.sh
+else
+    # Via curl for other environments
+    curl -fsSL http://k.local/termux.sh | bash
+fi
 
 # Test 2: Check fake-sudo setup
 echo "→ Testing fake-sudo setup"
@@ -79,9 +85,24 @@ echo "→ Testing sudo command functionality"
 export PATH="$HOME/bin:$PATH"
 assert_command "sudo echo test" "test"
 
-# Test 5: Idempotency test - run again
+# Test 5: Check nerdfetch installation
+echo "→ Testing nerdfetch installation"
+assert_file "/data/data/com.termux/files/usr/bin/nerdfetch"
+if [ ! -x "/data/data/com.termux/files/usr/bin/nerdfetch" ]; then
+    echo "✗ FAIL: nerdfetch is not executable"
+    exit 1
+fi
+echo "✓ nerdfetch is executable"
+
+# Test 6: Idempotency test - run again
 echo "→ Testing idempotency (running script again)"
-curl -fsSL http://k.local/termux.sh | bash
+if [ -f /tmp/bootstrap.sh ]; then
+    # Direct execution for Termux test
+    bash /tmp/bootstrap.sh
+else
+    # Via curl for other environments
+    curl -fsSL http://k.local/termux.sh | bash
+fi
 assert_file "$HOME/bin/sudo"
 assert_symlink "$HOME/bin/sudo" "$HOME/fake-sudo/sudo"
 

@@ -51,7 +51,14 @@ docker run -d \
 
 # Start simple HTTP server
 echo "→ Starting HTTP server"
-docker exec -d "$container_name" python3 -m http.server 80 --directory /var/www/bootstrap >/dev/null 2>&1
+if [ "$environment" = "termux" ]; then
+    # For Termux, skip HTTP server and copy file directly
+    echo "→ Copying bootstrap script directly for Termux test"
+    docker exec "$container_name" cp /var/www/bootstrap/termux.sh /tmp/bootstrap.sh
+else
+    # For other environments, use python3
+    docker exec -d "$container_name" python3 -m http.server 80 --directory /var/www/bootstrap >/dev/null 2>&1
+fi
 
 # Wait for server to start
 sleep 2

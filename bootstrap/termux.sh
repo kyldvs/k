@@ -72,7 +72,10 @@ _util_functions() {
 
     # Platform detection functions
     kd_is_termux() {
-        [ -d "/data/data/com.termux" ]
+        # Multiple checks for robust Termux detection
+        [ -d "/data/data/com.termux" ] || \
+        [ -n "${PREFIX:-}" ] && [ "$PREFIX" = "/data/data/com.termux/files/usr" ] || \
+        [ -f "/system/bin/app_process" ]
     }
 
     kd_is_ubuntu() {
@@ -278,5 +281,6 @@ _nerdfetch() {
 }
 
 _nerdfetch
+
 #--- /nerdfetch ---#
 
