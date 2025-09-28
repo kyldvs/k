@@ -40,44 +40,26 @@ _util_functions() {
         done
     }
 
-    # Format message for 60 char width - word wrap at word boundaries
-    _kd_wrap() {
-        local text="$1"
-        local width=60
-        local indent_str
-        indent_str=$(_kd_indent)
-        local indent_len=${#indent_str}
-        local max_width=$((width - indent_len))
-
-        echo "$text" | fold -s -w "$max_width" | while IFS= read -r line; do
-            if [ -n "$line" ]; then
-                printf "%s%s\n" "$indent_str" "$line"
-            fi
-        done
-    }
 
     # Log functions
     kd_log() {
         local msg="$*"
-        _kd_wrap "$msg"
+        printf "%s%s\n" "$(_kd_indent)" "$msg"
     }
 
     kd_info() {
         local msg="$*"
-        printf "%s[INFO]%s " "$KD_BLUE" "$KD_RESET"
-        _kd_wrap "$msg" | sed "1s/^${KD_INDENT}//"
+        printf "%s[INFO]%s %s\n" "$KD_BLUE" "$KD_RESET" "$msg"
     }
 
     kd_warn() {
         local msg="$*"
-        printf "%s[WARN]%s " "$KD_YELLOW" "$KD_RESET"
-        _kd_wrap "$msg" | sed "1s/^${KD_INDENT}//"
+        printf "%s[WARN]%s %s\n" "$KD_YELLOW" "$KD_RESET" "$msg"
     }
 
     kd_error() {
         local msg="$*"
-        printf "%s[ERROR]%s " "$KD_RED" "$KD_RESET" >&2
-        _kd_wrap "$msg" | sed "1s/^${KD_INDENT}//" >&2
+        printf "%s[ERROR]%s %s\n" "$KD_RED" "$KD_RESET" "$msg" >&2
     }
 
     # Step functions

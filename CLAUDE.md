@@ -50,7 +50,7 @@ Modular bootstrap system for compiling reusable setup scripts.
 - `kd_step_start "step-name" "description"` - Always call first
 - `kd_step_end` - Prints "✓ done"
 - `kd_step_skip "reason"` - Call after step_start if skipping
-- `kd_log "message"` - Prefer messages fit within 60 char terminal
+- `kd_log "message"` - Normal output with indentation
 - Use tilde paths (`~/file`) not `$HOME`
 - Step names use dash format (`"fake-sudo"`)
 
