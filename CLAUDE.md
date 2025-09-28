@@ -36,10 +36,15 @@ Modular bootstrap system for compiling reusable setup scripts.
 
 ### Adding New Parts
 1. Create `src/parts/part-name.sh` with function `_part_name()`
-2. Use `return` not `exit` inside functions (compiled script context)
-3. Add part name to relevant JSON config in `src/bootstrap/`
-4. Rebuild with `just bootstrap build <config>`
+2. Split logic: create `_needs_part_name()` function for checks
+3. Use `return` not `exit` inside functions (compiled script context)
+4. Bootstrap scripts must be non-interactive (no prompts, no `read`)
+5. Add part name to relevant JSON config in `src/bootstrap/`
+6. Rebuild with `just bootstrap build <config>`
 
 ### Commands
 - `just bootstrap build termux` - Build termux.sh from termux.json
 - Parts are fenced with `#--- part-name ---#` markers in output
+
+## Planning
+- When planning features, include "commit and push" as final steps
