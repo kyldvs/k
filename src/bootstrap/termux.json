@@ -4,6 +4,7 @@
     "fake-sudo",
     "init-profile",
     "nerdfetch",
+    "mosh",
     "proot-distro",
     "proot-distro-alpine",
     "proot-distro-doppler",

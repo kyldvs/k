@@ -1,0 +1,8 @@
+{
+  "parts": [
+    "util-functions",
+    "fake-sudo",
+    "init-profile",
+    "mosh"
+  ]
+}
