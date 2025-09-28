@@ -1,0 +1,18 @@
+set fallback := true
+set shell := ["bash", "-uc"]
+
+[no-cd]
+all:
+  @echo "Running all tests..."
+  @cd src/tests && ./run.sh termux
+
+[no-cd]
+config name environment="termux":
+  @echo "Testing {{name}} on {{environment}}..."
+  @cd src/tests && ./run.sh {{name}} {{environment}}
+
+[no-cd]
+clean:
+  @echo "Cleaning up test containers and images..."
+  @docker ps -a --filter "name=k-test-*" -q | xargs -r docker rm -f
+  @docker images -q "k-test-*" | xargs -r docker rmi -f

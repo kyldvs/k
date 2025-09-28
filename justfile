@@ -10,6 +10,7 @@ set ignore-comments
 
 mod hooks "tasks/hooks"
 mod bootstrap "tasks/bootstrap"
+mod test "tasks/test"
 
 home_dir := env_var('HOME')
 
