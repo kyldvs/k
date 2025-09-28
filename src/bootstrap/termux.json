@@ -3,6 +3,10 @@
     "util-functions",
     "fake-sudo",
     "init-profile",
-    "nerdfetch"
+    "nerdfetch",
+    "proot-distro",
+    "proot-distro-alpine",
+    "proot-distro-doppler",
+    "doppler"
   ]
 }

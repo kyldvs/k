@@ -284,3 +284,152 @@ _nerdfetch
 
 #--- /nerdfetch ---#
 
+
+#--- proot-distro ---#
+
+_needs_proot_distro() {
+    ! command -v proot-distro >/dev/null 2>&1
+}
+
+_proot_distro() {
+    kd_step_start "proot-distro" "Installing proot-distro"
+
+    if ! _needs_proot_distro; then
+        kd_step_skip "proot-distro already installed"
+        return 0
+    fi
+
+    platform=$(kd_get_platform)
+    case "$platform" in
+        termux)
+            kd_log "Installing proot-distro"
+            pkg install -y proot-distro
+            ;;
+        ubuntu|macos|*)
+            kd_step_skip "platform $platform not supported"
+            return 0
+            ;;
+    esac
+
+    kd_step_end
+}
+
+_proot_distro
+#--- /proot-distro ---#
+
+
+#--- proot-distro-alpine ---#
+
+_needs_proot_distro_alpine() {
+    ! proot-distro list --installed 2>/dev/null | grep -q "alpine"
+}
+
+_proot_distro_alpine() {
+    kd_step_start "proot-distro-alpine" "Installing Alpine distro"
+
+    if ! _needs_proot_distro_alpine; then
+        kd_step_skip "Alpine already installed"
+        return 0
+    fi
+
+    platform=$(kd_get_platform)
+    case "$platform" in
+        termux)
+            kd_log "Installing Alpine Linux via proot-distro"
+            proot-distro install alpine
+            ;;
+        ubuntu|macos|*)
+            kd_step_skip "platform $platform not supported"
+            return 0
+            ;;
+    esac
+
+    kd_step_end
+}
+
+_proot_distro_alpine
+#--- /proot-distro-alpine ---#
+
+
+#--- proot-distro-doppler ---#
+
+_needs_proot_distro_doppler() {
+    ! proot-distro login alpine -- command -v doppler >/dev/null 2>&1
+}
+
+_proot_distro_doppler() {
+    kd_step_start "proot-distro-doppler" "Installing doppler in Alpine"
+
+    if ! _needs_proot_distro_doppler; then
+        kd_step_skip "doppler already installed in Alpine"
+        return 0
+    fi
+
+    platform=$(kd_get_platform)
+    case "$platform" in
+        termux)
+            kd_log "Installing dummy doppler in Alpine"
+            proot-distro login alpine -- sh -c '
+                echo "#!/bin/sh" > /usr/local/bin/doppler
+                echo "echo \"hello doppler\"" >> /usr/local/bin/doppler
+                chmod +x /usr/local/bin/doppler
+            '
+            ;;
+        ubuntu|macos|*)
+            kd_step_skip "platform $platform not supported"
+            return 0
+            ;;
+    esac
+
+    kd_step_end
+}
+
+_proot_distro_doppler
+#--- /proot-distro-doppler ---#
+
+
+#--- doppler ---#
+
+_needs_doppler() {
+    [ ! -f "$HOME/bin/doppler" ]
+}
+
+_doppler() {
+    kd_step_start "doppler" "Setting up doppler wrapper"
+
+    if ! _needs_doppler; then
+        kd_step_skip "~/bin/doppler already exists"
+        return 0
+    fi
+
+    platform=$(kd_get_platform)
+    case "$platform" in
+        termux)
+            kd_log "Creating ~/bin directory"
+            mkdir -p "$HOME/bin"
+
+            kd_log "Creating doppler wrapper script"
+            cat > "$HOME/bin/doppler" << 'EOF'
+#!/data/data/com.termux/files/usr/bin/sh
+# Run Doppler inside Alpine proot, in the current directory, forwarding args
+set -e
+proot-distro login alpine -- sh -lc '
+  cd "$PWD"
+  exec doppler "$@"
+' doppler "$@"
+EOF
+
+            chmod +x "$HOME/bin/doppler"
+            ;;
+        ubuntu|macos|*)
+            kd_step_skip "platform $platform not supported"
+            return 0
+            ;;
+    esac
+
+    kd_step_end
+}
+
+_doppler
+#--- /doppler ---#
+
