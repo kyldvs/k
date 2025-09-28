@@ -61,13 +61,7 @@ assert_file_contains() {
 
 # Test 1: Run the bootstrap script
 echo "→ Running bootstrap script"
-if [ -f /tmp/bootstrap.sh ]; then
-    # Direct execution for Termux test
-    bash /tmp/bootstrap.sh
-else
-    # Via curl for other environments
-    curl -fsSL http://k.local/termux.sh | bash
-fi
+curl -fsSL http://k.local/termux.sh | bash
 
 # Test 2: Check fake-sudo setup
 echo "→ Testing fake-sudo setup"
@@ -96,13 +90,7 @@ echo "✓ nerdfetch is executable"
 
 # Test 6: Idempotency test - run again
 echo "→ Testing idempotency (running script again)"
-if [ -f /tmp/bootstrap.sh ]; then
-    # Direct execution for Termux test
-    bash /tmp/bootstrap.sh
-else
-    # Via curl for other environments
-    curl -fsSL http://k.local/termux.sh | bash
-fi
+curl -fsSL http://k.local/termux.sh | bash
 assert_file "$HOME/bin/sudo"
 assert_symlink "$HOME/bin/sudo" "$HOME/fake-sudo/sudo"
 

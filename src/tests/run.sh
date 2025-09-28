@@ -32,7 +32,15 @@ container_name="k-test-${config}-${environment}-$$"
 
 echo "→ Building test image: $image_name"
 cd "images/$environment"
-docker build -t "$image_name" . >/dev/null 2>&1
+
+# Check if custom build script exists
+if [ -f "build.sh" ]; then
+    echo "  Using custom build script"
+    ./build.sh "$image_name" >/dev/null 2>&1
+else
+    docker build -t "$image_name" . >/dev/null 2>&1
+fi
+
 cd ../..
 
 cleanup() {
@@ -42,21 +50,36 @@ cleanup() {
 trap cleanup EXIT
 
 echo "→ Starting test container: $container_name"
-docker run -d \
-    --name "$container_name" \
-    --add-host="k.local:127.0.0.1" \
-    -v "$(pwd)/../../bootstrap:/var/www/bootstrap:ro" \
-    "$image_name" \
-    tail -f /dev/null >/dev/null
+if [ "$environment" = "termux" ]; then
+    # For Termux, use ulimit to prevent dnsmasq hang at runtime
+    # Use sleep instead of tail to keep entrypoint working properly
+    docker run -d \
+        --name "$container_name" \
+        --add-host="k.local:127.0.0.1" \
+        --ulimit nofile=65536:65536 \
+        -v "$(pwd)/../../bootstrap:/var/www/bootstrap:ro" \
+        "$image_name" \
+        sleep infinity >/dev/null
+else
+    docker run -d \
+        --name "$container_name" \
+        --add-host="k.local:127.0.0.1" \
+        -v "$(pwd)/../../bootstrap:/var/www/bootstrap:ro" \
+        "$image_name" \
+        tail -f /dev/null >/dev/null
+fi
+
+# Install Python if needed (for environments like Termux)
+if [ "$environment" = "termux" ]; then
+    echo "→ Installing Python in container (this may take a minute)"
+    docker exec --user system "$container_name" bash -c "command -v python3 >/dev/null 2>&1 || (pkg update -y && pkg install -y python3)" >/dev/null 2>&1
+fi
 
 # Start simple HTTP server
 echo "→ Starting HTTP server"
 if [ "$environment" = "termux" ]; then
-    # For Termux, skip HTTP server and copy file directly
-    echo "→ Copying bootstrap script directly for Termux test"
-    docker exec "$container_name" cp /var/www/bootstrap/termux.sh /tmp/bootstrap.sh
+    docker exec -d --user system "$container_name" python3 -m http.server 80 --directory /var/www/bootstrap >/dev/null 2>&1
 else
-    # For other environments, use python3
     docker exec -d "$container_name" python3 -m http.server 80 --directory /var/www/bootstrap >/dev/null 2>&1
 fi
 
@@ -64,6 +87,10 @@ fi
 sleep 2
 
 echo "→ Running test: $test_file"
-docker exec -i "$container_name" bash < "$test_file"
+if [ "$environment" = "termux" ]; then
+    docker exec -i --user system "$container_name" bash < "$test_file"
+else
+    docker exec -i "$container_name" bash < "$test_file"
+fi
 
 echo "✓ Test passed: $config on $environment"
