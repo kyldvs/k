@@ -149,12 +149,12 @@ _needs_fake_sudo() {
 
 _fake_sudo() {
     # Create fake sudo command for Termux in home/bin
-    kd_step_start "fake-sudo" "Setting up for Termux"
-
     if ! _needs_fake_sudo; then
         kd_step_skip "fake-sudo" "$HOME/bin/sudo already exists"
         return 0
     fi
+
+    kd_step_start "fake-sudo" "Setting up for Termux"
 
     # Create bin directory if it doesn't exist
     kd_log "Creating $HOME/bin directory"
@@ -191,12 +191,12 @@ _needs_profile_init() {
 }
 
 _init_profile() {
-    kd_step_start "init-profile" "Setting up .profile"
-
     if ! _needs_profile_init; then
         kd_step_skip "init-profile" "$HOME/.profile already exists"
         return 0
     fi
+
+    kd_step_start "init-profile" "Setting up .profile"
 
     cat > "$HOME/.profile" << 'EOF'
 # POSIX compliant profile with common setup
