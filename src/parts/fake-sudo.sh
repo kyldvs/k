@@ -1,10 +1,14 @@
+_needs_fake_sudo() {
+    # Check if bin/sudo already exists
+    [ ! -f "$HOME/bin/sudo" ]
+}
+
 _fake_sudo() {
     # Create fake sudo command for Termux in home/bin
     echo "Setting up fake sudo for Termux..."
 
-    # Check if fake sudo is already installed
-    if [ -f "$HOME/bin/sudo" ]; then
-        echo "Fake sudo already installed, skipping"
+    if ! _needs_fake_sudo; then
+        echo "$HOME/bin/sudo exists, skipping"
         return 0
     fi
 
