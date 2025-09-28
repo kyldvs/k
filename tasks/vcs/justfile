@@ -1,0 +1,12 @@
+set fallback := true
+set shell := ["bash", "-uc"]
+set ignore-comments
+
+[no-cd]
+acp msg:
+  #!/usr/bin/env bash
+  set -euo pipefail
+
+  git add -A
+  git commit -m "{{msg}}"
+  git push
