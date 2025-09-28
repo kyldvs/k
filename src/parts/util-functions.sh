@@ -4,16 +4,17 @@ _needs_util_functions() {
 }
 
 _util_functions() {
-    # POSIX compliant color definitions - only set if stdout is a tty
-    if [ -t 1 ]; then
-        KD_RED='\033[31m'
-        KD_GREEN='\033[32m'
-        KD_YELLOW='\033[33m'
-        KD_BLUE='\033[34m'
-        KD_CYAN='\033[36m'
-        KD_GRAY='\033[90m'
-        KD_RESET='\033[0m'
-        KD_BOLD='\033[1m'
+    # POSIX compliant color definitions - check for color support
+    if [ -t 1 ] || [ "${KD_COLOR:-auto}" = "always" ] || [ -n "$TERMUX_VERSION" ]; then
+        # Use printf to generate actual escape characters
+        KD_RED=$(printf '\033[31m')
+        KD_GREEN=$(printf '\033[32m')
+        KD_YELLOW=$(printf '\033[33m')
+        KD_BLUE=$(printf '\033[34m')
+        KD_CYAN=$(printf '\033[36m')
+        KD_GRAY=$(printf '\033[90m')
+        KD_RESET=$(printf '\033[0m')
+        KD_BOLD=$(printf '\033[1m')
     else
         KD_RED=''
         KD_GREEN=''
