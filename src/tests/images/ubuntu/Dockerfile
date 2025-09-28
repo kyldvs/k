@@ -5,14 +5,19 @@ RUN apt-get update && apt-get install -y \
     bash \
     curl \
     jq \
-    python3 \
+    netcat-openbsd \
     sudo \
+    xxd \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
 RUN useradd -m -s /bin/bash testuser \
     && usermod -aG sudo testuser \
     && echo "testuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Copy bash server fixtures
+COPY src/tests/fixtures /fixtures
+RUN chmod +x /fixtures/*.sh
 
 # Create directories and fix permissions
 RUN mkdir -p /var/www/bootstrap \

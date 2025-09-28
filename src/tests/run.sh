@@ -64,6 +64,7 @@ if [ "$environment" = "termux" ]; then
     if ! container_output=$(docker run -d \
         --name "$container_name" \
         --add-host="k.local:127.0.0.1" \
+        -p 80:80 \
         --ulimit nofile=65536:65536 \
         -v "$(pwd)/../../bootstrap:/var/www/bootstrap:ro" \
         "$image_name" \
@@ -76,6 +77,7 @@ else
     if ! container_output=$(docker run -d \
         --name "$container_name" \
         --add-host="k.local:127.0.0.1" \
+        -p 80:80 \
         -v "$(pwd)/../../bootstrap:/var/www/bootstrap:ro" \
         "$image_name" \
         tail -f /dev/null 2>&1); then
@@ -85,26 +87,18 @@ else
     fi
 fi
 
-# Install Python if needed (for Termux)
-if [ "$environment" = "termux" ]; then
-    echo "→ Installing Python in container"
-    if ! python_output=$(docker exec --user system "$container_name" bash -c "command -v python3 >/dev/null 2>&1 || (pkg update -y && pkg install -y python3)" 2>&1); then
-        echo "✗ Python installation failed:"
-        echo "$python_output"
-        exit 1
-    fi
-fi
+# No Python installation needed - using bash HTTP server
 
-# Start HTTP server
-echo "→ Starting HTTP server"
+# Start bash HTTP server
+echo "→ Starting bash HTTP server"
 if [ "$environment" = "termux" ]; then
-    if ! server_output=$(docker exec -d --user system "$container_name" python3 -m http.server 80 --directory /var/www/bootstrap 2>&1); then
+    if ! server_output=$(docker exec -d --user system "$container_name" bash -c "cd / && BIND_ADDRESS=0.0.0.0 HTTP_PORT=80 /fixtures/bash-server.sh /fixtures/server-config.sh" 2>&1); then
         echo "✗ HTTP server start failed:"
         echo "$server_output"
         exit 1
     fi
 else
-    if ! server_output=$(docker exec -d "$container_name" python3 -m http.server 80 --directory /var/www/bootstrap 2>&1); then
+    if ! server_output=$(docker exec -d "$container_name" bash -c "cd / && BIND_ADDRESS=0.0.0.0 HTTP_PORT=80 /fixtures/bash-server.sh /fixtures/server-config.sh" 2>&1); then
         echo "✗ HTTP server start failed:"
         echo "$server_output"
         exit 1
@@ -112,19 +106,19 @@ else
 fi
 
 # Wait for server to start and verify it's running
-sleep 2
-echo "→ Verifying HTTP server"
+sleep 3
+echo "→ Verifying bash HTTP server"
 if [ "$environment" = "termux" ]; then
     if ! docker exec --user system "$container_name" curl -s -f http://localhost:80/ >/dev/null 2>&1; then
         echo "✗ HTTP server not responding"
         # Show server process status
-        docker exec --user system "$container_name" ps aux | grep python3 || true
+        docker exec --user system "$container_name" ps aux | grep bash-server || true
         exit 1
     fi
 else
     if ! docker exec "$container_name" curl -s -f http://localhost:80/ >/dev/null 2>&1; then
         echo "✗ HTTP server not responding"
-        docker exec "$container_name" ps aux | grep python3 || true
+        docker exec "$container_name" ps aux | grep bash-server || true
         exit 1
     fi
 fi
