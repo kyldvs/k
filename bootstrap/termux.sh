@@ -119,15 +119,18 @@ _util_functions() {
     }
 
     kd_step_skip() {
-        local step_name="$1"
-        shift
         local reason="$*"
 
-        printf "  %s-%s %s%s%s" "$KD_GRAY" "$KD_RESET" "$KD_GRAY" "$step_name" "$KD_RESET"
+        if [ $KD_INDENT -gt 0 ]; then
+            KD_INDENT=$((KD_INDENT - 1))
+        fi
+
+        printf "  %s○%s %sskipping%s" "$KD_GRAY" "$KD_RESET" "$KD_GRAY" "$KD_RESET"
         if [ -n "$reason" ]; then
-            printf ": %s" "$reason"
+            printf " %s(%s)%s" "$KD_GRAY" "$reason" "$KD_RESET"
         fi
         printf "\n"
+        KD_CURRENT_STEP=""
     }
 }
 
@@ -145,12 +148,12 @@ _needs_fake_sudo() {
 
 _fake_sudo() {
     # Create fake sudo command for Termux in home/bin
+    kd_step_start "fake-sudo" "Setting up for Termux"
+
     if ! _needs_fake_sudo; then
-        kd_step_skip "fake-sudo" "~/bin/sudo already exists"
+        kd_step_skip "~/bin/sudo already exists"
         return 0
     fi
-
-    kd_step_start "fake-sudo" "Setting up for Termux"
 
     # Create bin directory if it doesn't exist
     kd_log "Creating ~/bin directory"
@@ -187,12 +190,12 @@ _needs_profile_init() {
 }
 
 _init_profile() {
+    kd_step_start "init-profile" "Setting up .profile"
+
     if ! _needs_profile_init; then
-        kd_step_skip "init-profile" "~/.profile already exists"
+        kd_step_skip "~/.profile already exists"
         return 0
     fi
-
-    kd_step_start "init-profile" "Setting up .profile"
 
     cat > "$HOME/.profile" << 'EOF'
 # POSIX compliant profile with common setup

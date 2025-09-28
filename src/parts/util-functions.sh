@@ -111,15 +111,18 @@ _util_functions() {
     }
 
     kd_step_skip() {
-        local step_name="$1"
-        shift
         local reason="$*"
 
-        printf "  %s-%s %s%s%s" "$KD_GRAY" "$KD_RESET" "$KD_GRAY" "$step_name" "$KD_RESET"
+        if [ $KD_INDENT -gt 0 ]; then
+            KD_INDENT=$((KD_INDENT - 1))
+        fi
+
+        printf "  %s○%s %sskipping%s" "$KD_GRAY" "$KD_RESET" "$KD_GRAY" "$KD_RESET"
         if [ -n "$reason" ]; then
-            printf ": %s" "$reason"
+            printf " %s(%s)%s" "$KD_GRAY" "$reason" "$KD_RESET"
         fi
         printf "\n"
+        KD_CURRENT_STEP=""
     }
 }
 
