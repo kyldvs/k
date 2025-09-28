@@ -4,10 +4,10 @@ _needs_profile_init() {
 }
 
 _init_profile() {
-    echo "Setting up .profile..."
+    kd_step_start "init-profile" "Setting up .profile"
 
     if ! _needs_profile_init; then
-        echo "$HOME/.profile exists, skipping"
+        kd_step_skip "init-profile" "$HOME/.profile already exists"
         return 0
     fi
 
@@ -15,7 +15,7 @@ _init_profile() {
 # POSIX compliant profile with common setup
 EOF
 
-    echo ".profile created successfully"
+    kd_step_end "created successfully"
 }
 
 _init_profile
