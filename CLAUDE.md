@@ -46,5 +46,13 @@ Modular bootstrap system for compiling reusable setup scripts.
 - `just bootstrap build termux` - Build termux.sh from termux.json
 - Parts are fenced with `#--- part-name ---#` markers in output
 
+### Part Utility Functions
+- `kd_step_start "step-name" "description"` - Always call first
+- `kd_step_end` - Prints "✓ done"
+- `kd_step_skip "reason"` - Call after step_start if skipping
+- `kd_log "message"` - Prefer messages fit within 60 char terminal
+- Use tilde paths (`~/file`) not `$HOME`
+- Step names use dash format (`"fake-sudo"`)
+
 ## Planning
 - When planning features, include "commit and push" as final steps
