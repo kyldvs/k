@@ -70,6 +70,50 @@ _util_functions() {
         printf "%s[ERROR]%s %s\n" "$KD_RED" "$KD_RESET" "$msg" >&2
     }
 
+    # Platform detection functions
+    kd_is_termux() {
+        [ -d "/data/data/com.termux" ]
+    }
+
+    kd_is_ubuntu() {
+        [ -f /etc/os-release ] && grep -q "Ubuntu" /etc/os-release
+    }
+
+    kd_is_macos() {
+        [ "$(uname -s)" = "Darwin" ]
+    }
+
+    kd_get_platform() {
+        if kd_is_termux; then
+            echo "termux"
+        elif kd_is_ubuntu; then
+            echo "ubuntu"
+        elif kd_is_macos; then
+            echo "macos"
+        else
+            echo "unknown"
+        fi
+    }
+
+    # Cross-environment pattern functions
+    _for_termux() {
+        if kd_is_termux; then
+            "$@"
+        fi
+    }
+
+    _for_ubuntu() {
+        if kd_is_ubuntu; then
+            "$@"
+        fi
+    }
+
+    _for_macos() {
+        if kd_is_macos; then
+            "$@"
+        fi
+    }
+
     # Step functions
     KD_CURRENT_STEP=""
 
@@ -189,4 +233,50 @@ EOF
 _init_profile
 
 #--- /init-profile ---#
+
+
+#--- nerdfetch ---#
+
+_needs_nerdfetch() {
+    ! command -v nerdfetch >/dev/null 2>&1
+}
+
+_nerdfetch_termux() {
+    kd_log "Installing nerdfetch for Termux"
+    curl -fsSL https://raw.githubusercontent.com/ThatOneCalculator/NerdFetch/main/nerdfetch -o /data/data/com.termux/files/usr/bin/nerdfetch
+    chmod a+x /data/data/com.termux/files/usr/bin/nerdfetch
+}
+
+_nerdfetch_ubuntu() {
+    return 0
+}
+
+_nerdfetch_macos() {
+    return 0
+}
+
+_nerdfetch() {
+    kd_step_start "nerdfetch" "Installing nerdfetch"
+
+    if ! _needs_nerdfetch; then
+        kd_step_skip "nerdfetch already installed"
+        return 0
+    fi
+
+    platform=$(kd_get_platform)
+    case "$platform" in
+        termux)
+            _nerdfetch_termux
+            ;;
+        ubuntu|macos|*)
+            kd_step_skip "platform $platform not supported"
+            return 0
+            ;;
+    esac
+
+    kd_step_end
+}
+
+_nerdfetch
+#--- /nerdfetch ---#
 

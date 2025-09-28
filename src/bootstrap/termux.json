@@ -2,6 +2,7 @@
   "parts": [
     "util-functions",
     "fake-sudo",
-    "init-profile"
+    "init-profile",
+    "nerdfetch"
   ]
 }

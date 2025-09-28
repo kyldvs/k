@@ -62,6 +62,50 @@ _util_functions() {
         printf "%s[ERROR]%s %s\n" "$KD_RED" "$KD_RESET" "$msg" >&2
     }
 
+    # Platform detection functions
+    kd_is_termux() {
+        [ -d "/data/data/com.termux" ]
+    }
+
+    kd_is_ubuntu() {
+        [ -f /etc/os-release ] && grep -q "Ubuntu" /etc/os-release
+    }
+
+    kd_is_macos() {
+        [ "$(uname -s)" = "Darwin" ]
+    }
+
+    kd_get_platform() {
+        if kd_is_termux; then
+            echo "termux"
+        elif kd_is_ubuntu; then
+            echo "ubuntu"
+        elif kd_is_macos; then
+            echo "macos"
+        else
+            echo "unknown"
+        fi
+    }
+
+    # Cross-environment pattern functions
+    _for_termux() {
+        if kd_is_termux; then
+            "$@"
+        fi
+    }
+
+    _for_ubuntu() {
+        if kd_is_ubuntu; then
+            "$@"
+        fi
+    }
+
+    _for_macos() {
+        if kd_is_macos; then
+            "$@"
+        fi
+    }
+
     # Step functions
     KD_CURRENT_STEP=""
 
