@@ -128,7 +128,7 @@ echo "✓ doppler is installed in Alpine"
 echo "→ Testing doppler wrapper functionality"
 export PATH="$HOME/bin:$PATH"
 output=$(doppler 2>&1 || true)
-if [[ "$output" != *"hello doppler"* ]]; then
+if [[ "$output" != *"Usage:"* ]] || [[ "$output" != *"doppler [command]"* ]]; then
     echo "✗ FAIL: doppler wrapper output incorrect: $output"
     exit 1
 fi
