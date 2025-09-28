@@ -43,7 +43,8 @@ Modular bootstrap system for compiling reusable setup scripts.
 6. Rebuild with `just bootstrap build <config>`
 
 ### Commands
-- `just bootstrap build termux` - Build termux.sh from termux.json
+- `just bootstrap build` - Build all bootstrap configs automatically
+- `just bootstrap build-one <config>` - Build specific config (e.g., termux)
 - Parts are fenced with `#--- part-name ---#` markers in output
 
 ### Part Utility Functions
@@ -60,7 +61,8 @@ Docker-based testing simulates real curl install of bootstrap scripts.
 
 ### Structure
 - `src/tests/`: Docker images, test runner, test assertions
-- Run: `just test config <name>` (e.g., `just test config termux`)
+- Run: `just test all` - Test all bootstrap configs automatically
+- Run: `just test config <name>` - Test specific config (e.g., `just test config termux`)
 - Clean: `just test clean`
 
 ### Key Points
@@ -69,5 +71,6 @@ Docker-based testing simulates real curl install of bootstrap scripts.
 - Docker: ensure testuser owns home directory
 - Tests check idempotency (run twice, no errors)
 
-## Planning
+## Feature Development Workflow
+- Standard workflow: `just bootstrap build` → `just test all` → commit → push
 - When planning features, include "commit and push" as final steps
