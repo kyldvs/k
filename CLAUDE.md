@@ -15,6 +15,8 @@ This is the dotfiles repo for kyldvs.
 - Use conventional commit style
 - When writing a commit message only include a one line message, not a detailed message
 - Git hooks: defer to just (`.husky/pre-commit` → `just hooks pre-commit`)
+- **PREFER** `just vcs acp "commit message"` over manual git commands
+- `just vcs acp <msg>` automatically: adds all changes, commits, pushes
 
 ## Justfile Organization
 
@@ -72,5 +74,5 @@ Docker-based testing simulates real curl install of bootstrap scripts.
 - Tests check idempotency (run twice, no errors)
 
 ## Feature Development Workflow
-- Standard workflow: `just bootstrap build` → `just test all` → commit → push
-- When planning features, include "commit and push" as final steps
+- Standard workflow: `just bootstrap build` → `just test all` → `just vcs acp "commit message"`
+- When planning features, include "commit and push" as final steps using `just vcs acp`
