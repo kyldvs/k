@@ -3,6 +3,7 @@
     "util-functions",
     "fake-sudo",
     "init-profile",
-    "mosh"
+    "mosh",
+    "ssh-utils"
   ]
 }
