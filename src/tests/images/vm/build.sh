@@ -5,9 +5,11 @@ set -euo pipefail
 
 image_name="${1:-ubuntu-test}"
 
-# Build Docker image
+# Build with network=host for DNS resolution and ulimit for reliability
 # Build context is repo root, specify dockerfile path
 docker build \
+    --network=host \
+    --ulimit nofile=65536:65536 \
     -f Dockerfile \
     -t "$image_name" \
     ../../../..

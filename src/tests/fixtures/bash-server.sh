@@ -239,7 +239,7 @@ parseAndPrint(){
     parseHttpHeaders
 
     # Basic Auth
-    if (( BASIC_AUTH )) then
+    if (( BASIC_AUTH )); then
         basicAuth || return 1
     fi
 
