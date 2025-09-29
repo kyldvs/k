@@ -4,6 +4,42 @@
 # Do not edit directly - edit parts and rebuild
 #
 
+#--- init-k ---#
+
+#!/bin/bash
+
+_needs_init_k() {
+    [ ! -d ~/.k ]
+}
+
+_init_k() {
+    kd_step_start "init-k" "Setting up ~/.k directory structure"
+
+    if ! _needs_init_k; then
+        kd_step_skip "~/.k directory already exists"
+        return 0
+    fi
+
+    kd_log "Creating ~/.k directory"
+    mkdir -p ~/.k
+
+    kd_log "Creating ~/.k/init.sh loader script"
+    cat > ~/.k/init.sh << 'EOF'
+# ~/.k/init.sh - Loader for all shell customizations
+# Sources all .sh files in ~/.k/ except init.sh itself
+
+for f in ~/.k/*.sh; do
+    [ -f "$f" ] && [ "$f" != ~/.k/init.sh ] && . "$f"
+done
+EOF
+
+    kd_step_end
+}
+
+_init_k
+#--- /init-k ---#
+
+
 #--- util-functions ---#
 
 _needs_util_functions() {
@@ -204,21 +240,24 @@ _fake_sudo
 #--- init-profile ---#
 
 _needs_profile_init() {
-    # Check if .profile already exists
-    [ ! -f "$HOME/.profile" ]
+    ! grep -q '. ~/.k/init.sh' ~/.profile 2>/dev/null
 }
 
 _init_profile() {
     kd_step_start "init-profile" "Setting up .profile"
 
     if ! _needs_profile_init; then
-        kd_step_skip "~/.profile already exists"
+        kd_step_skip "~/.k/init.sh already sourced in profile"
         return 0
     fi
 
-    cat > "$HOME/.profile" << 'EOF'
-# POSIX compliant profile with common setup
-EOF
+    # Create .profile if it doesn't exist
+    [ ! -f ~/.profile ] && echo "# POSIX compliant profile with common setup" > ~/.profile
+
+    kd_log "Adding ~/.k/init.sh source line to ~/.profile"
+    echo "" >> ~/.profile
+    echo "# Source shell customizations from ~/.k/" >> ~/.profile
+    echo ". ~/.k/init.sh" >> ~/.profile
 
     kd_step_end
 }
@@ -328,21 +367,20 @@ _mosh
 #!/bin/bash
 
 _needs_ssh_utils() {
-    grep -q "ssha()" ~/.profile 2>/dev/null
+    [ ! -f ~/.k/ssh-utils.sh ]
 }
 
 _ssh_utils() {
     kd_step_start "ssh-utils" "Add SSH agent wrapper functions"
 
-    if _needs_ssh_utils; then
+    if ! _needs_ssh_utils; then
         kd_step_skip "SSH utilities already configured"
         return
     fi
 
-    kd_log "Adding SSH agent wrapper functions to ~/.profile"
+    kd_log "Creating ~/.k/ssh-utils.sh"
 
-    cat >> ~/.profile << 'EOF'
-
+    cat > ~/.k/ssh-utils.sh << 'EOF'
 # SSH agent wrapper functions
 ssha() {
     # Check if agent running
@@ -370,6 +408,9 @@ EOF
 
     kd_step_end
 }
+
+_ssh_utils
+
 #--- /ssh-utils ---#
 
 

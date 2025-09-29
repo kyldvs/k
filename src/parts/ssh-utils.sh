@@ -1,21 +1,20 @@
 #!/bin/bash
 
 _needs_ssh_utils() {
-    grep -q "ssha()" ~/.profile 2>/dev/null
+    [ ! -f ~/.k/ssh-utils.sh ]
 }
 
 _ssh_utils() {
     kd_step_start "ssh-utils" "Add SSH agent wrapper functions"
 
-    if _needs_ssh_utils; then
+    if ! _needs_ssh_utils; then
         kd_step_skip "SSH utilities already configured"
         return
     fi
 
-    kd_log "Adding SSH agent wrapper functions to ~/.profile"
+    kd_log "Creating ~/.k/ssh-utils.sh"
 
-    cat >> ~/.profile << 'EOF'
-
+    cat > ~/.k/ssh-utils.sh << 'EOF'
 # SSH agent wrapper functions
 ssha() {
     # Check if agent running
@@ -43,3 +42,5 @@ EOF
 
     kd_step_end
 }
+
+_ssh_utils
