@@ -1,7 +1,8 @@
 #!/bin/bash
 
 _needs_init_k() {
-    [ ! -d ~/.config/k ]
+    # Check if init.sh exists and has the expected content
+    [ ! -f ~/.config/k/init.sh ] || ! grep -q 'for f in ~/.config/k/\*.sh' ~/.config/k/init.sh 2>/dev/null
 }
 
 _init_k() {
