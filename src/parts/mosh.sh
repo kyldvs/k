@@ -25,19 +25,7 @@ _mosh() {
         return 0
     fi
 
-    platform=$(kd_get_platform)
-    case "$platform" in
-        termux)
-            _mosh_termux
-            ;;
-        ubuntu)
-            _mosh_ubuntu
-            ;;
-        *)
-            kd_step_skip "platform $platform not supported"
-            return 0
-            ;;
-    esac
+    kd_platform_dispatch "mosh"
 
     kd_step_end
 }

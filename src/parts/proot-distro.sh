@@ -2,6 +2,11 @@ _needs_proot_distro() {
     ! command -v proot-distro >/dev/null 2>&1
 }
 
+_proot_distro_termux() {
+    kd_log "Installing proot-distro"
+    pkg install -y proot-distro
+}
+
 _proot_distro() {
     kd_step_start "proot-distro" "Installing proot-distro"
 
@@ -10,17 +15,7 @@ _proot_distro() {
         return 0
     fi
 
-    platform=$(kd_get_platform)
-    case "$platform" in
-        termux)
-            kd_log "Installing proot-distro"
-            pkg install -y proot-distro
-            ;;
-        ubuntu|*)
-            kd_step_skip "platform $platform not supported"
-            return 0
-            ;;
-    esac
+    kd_platform_dispatch "proot-distro"
 
     kd_step_end
 }

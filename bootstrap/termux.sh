@@ -106,6 +106,27 @@ _util_functions() {
         fi
     }
 
+    # Platform dispatch helper - convention over configuration
+    # Usage: kd_platform_dispatch "function_name"
+    # Calls _function_name_<platform> based on current platform
+    # Returns 1 if platform not supported, 0 otherwise
+    kd_platform_dispatch() {
+        local base_name="$1"
+        local platform
+        platform=$(kd_get_platform)
+
+        local func_name="_${base_name}_${platform}"
+
+        # Check if platform-specific function exists
+        if command -v "$func_name" >/dev/null 2>&1; then
+            "$func_name"
+            return 0
+        else
+            kd_step_skip "platform $platform not supported"
+            return 1
+        fi
+    }
+
 
     # Step functions
     KD_CURRENT_STEP=""
@@ -294,16 +315,7 @@ _nerdfetch() {
         return 0
     fi
 
-    platform=$(kd_get_platform)
-    case "$platform" in
-        termux)
-            _nerdfetch_termux
-            ;;
-        ubuntu|*)
-            kd_step_skip "platform $platform not supported"
-            return 0
-            ;;
-    esac
+    kd_platform_dispatch "nerdfetch"
 
     kd_step_end
 }
@@ -342,19 +354,7 @@ _mosh() {
         return 0
     fi
 
-    platform=$(kd_get_platform)
-    case "$platform" in
-        termux)
-            _mosh_termux
-            ;;
-        ubuntu)
-            _mosh_ubuntu
-            ;;
-        *)
-            kd_step_skip "platform $platform not supported"
-            return 0
-            ;;
-    esac
+    kd_platform_dispatch "mosh"
 
     kd_step_end
 }
@@ -423,6 +423,11 @@ _needs_proot_distro() {
     ! command -v proot-distro >/dev/null 2>&1
 }
 
+_proot_distro_termux() {
+    kd_log "Installing proot-distro"
+    pkg install -y proot-distro
+}
+
 _proot_distro() {
     kd_step_start "proot-distro" "Installing proot-distro"
 
@@ -431,17 +436,7 @@ _proot_distro() {
         return 0
     fi
 
-    platform=$(kd_get_platform)
-    case "$platform" in
-        termux)
-            kd_log "Installing proot-distro"
-            pkg install -y proot-distro
-            ;;
-        ubuntu|*)
-            kd_step_skip "platform $platform not supported"
-            return 0
-            ;;
-    esac
+    kd_platform_dispatch "proot-distro"
 
     kd_step_end
 }
@@ -457,6 +452,11 @@ _needs_proot_distro_alpine() {
     [ ! -d "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/alpine" ]
 }
 
+_proot_distro_alpine_termux() {
+    kd_log "Installing Alpine Linux via proot-distro"
+    proot-distro install alpine
+}
+
 _proot_distro_alpine() {
     kd_step_start "proot-distro-alpine" "Installing Alpine distro"
 
@@ -465,17 +465,7 @@ _proot_distro_alpine() {
         return 0
     fi
 
-    platform=$(kd_get_platform)
-    case "$platform" in
-        termux)
-            kd_log "Installing Alpine Linux via proot-distro"
-            proot-distro install alpine
-            ;;
-        ubuntu|*)
-            kd_step_skip "platform $platform not supported"
-            return 0
-            ;;
-    esac
+    kd_platform_dispatch "proot-distro-alpine"
 
     kd_step_end
 }
@@ -491,6 +481,15 @@ _needs_proot_distro_doppler() {
     ! proot-distro login alpine -- command -v doppler >/dev/null 2>&1
 }
 
+_proot_distro_doppler_termux() {
+    kd_log "Installing Doppler CLI in Alpine"
+    proot-distro login alpine -- sh -c '
+        wget -q -t3 "https://packages.doppler.com/public/cli/rsa.8004D9FF50437357.key" -O /etc/apk/keys/cli@doppler-8004D9FF50437357.rsa.pub
+        echo "https://packages.doppler.com/public/cli/alpine/any-version/main" | tee -a /etc/apk/repositories
+        apk add doppler
+    '
+}
+
 _proot_distro_doppler() {
     kd_step_start "proot-distro-doppler" "Installing doppler in Alpine"
 
@@ -499,21 +498,7 @@ _proot_distro_doppler() {
         return 0
     fi
 
-    platform=$(kd_get_platform)
-    case "$platform" in
-        termux)
-            kd_log "Installing Doppler CLI in Alpine"
-            proot-distro login alpine -- sh -c '
-                wget -q -t3 "https://packages.doppler.com/public/cli/rsa.8004D9FF50437357.key" -O /etc/apk/keys/cli@doppler-8004D9FF50437357.rsa.pub
-                echo "https://packages.doppler.com/public/cli/alpine/any-version/main" | tee -a /etc/apk/repositories
-                apk add doppler
-            '
-            ;;
-        ubuntu|*)
-            kd_step_skip "platform $platform not supported"
-            return 0
-            ;;
-    esac
+    kd_platform_dispatch "proot-distro-doppler"
 
     kd_step_end
 }
@@ -529,22 +514,12 @@ _needs_doppler() {
     [ ! -f "$HOME/bin/doppler" ]
 }
 
-_doppler() {
-    kd_step_start "doppler" "Setting up doppler wrapper"
+_doppler_termux() {
+    kd_log "Creating ~/bin directory"
+    mkdir -p "$HOME/bin"
 
-    if ! _needs_doppler; then
-        kd_step_skip "~/bin/doppler already exists"
-        return 0
-    fi
-
-    platform=$(kd_get_platform)
-    case "$platform" in
-        termux)
-            kd_log "Creating ~/bin directory"
-            mkdir -p "$HOME/bin"
-
-            kd_log "Creating doppler wrapper script"
-            cat > "$HOME/bin/doppler" << 'EOF'
+    kd_log "Creating doppler wrapper script"
+    cat > "$HOME/bin/doppler" << 'EOF'
 #!/data/data/com.termux/files/usr/bin/sh
 # Run Doppler inside Alpine proot, in the current directory, forwarding args
 set -e
@@ -554,13 +529,18 @@ proot-distro login alpine -- sh -lc '
 ' doppler "$@"
 EOF
 
-            chmod +x "$HOME/bin/doppler"
-            ;;
-        ubuntu|*)
-            kd_step_skip "platform $platform not supported"
-            return 0
-            ;;
-    esac
+    chmod +x "$HOME/bin/doppler"
+}
+
+_doppler() {
+    kd_step_start "doppler" "Setting up doppler wrapper"
+
+    if ! _needs_doppler; then
+        kd_step_skip "~/bin/doppler already exists"
+        return 0
+    fi
+
+    kd_platform_dispatch "doppler"
 
     kd_step_end
 }

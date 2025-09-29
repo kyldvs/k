@@ -21,16 +21,7 @@ _nerdfetch() {
         return 0
     fi
 
-    platform=$(kd_get_platform)
-    case "$platform" in
-        termux)
-            _nerdfetch_termux
-            ;;
-        ubuntu|*)
-            kd_step_skip "platform $platform not supported"
-            return 0
-            ;;
-    esac
+    kd_platform_dispatch "nerdfetch"
 
     kd_step_end
 }

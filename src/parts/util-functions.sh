@@ -98,6 +98,27 @@ _util_functions() {
         fi
     }
 
+    # Platform dispatch helper - convention over configuration
+    # Usage: kd_platform_dispatch "function_name"
+    # Calls _function_name_<platform> based on current platform
+    # Returns 1 if platform not supported, 0 otherwise
+    kd_platform_dispatch() {
+        local base_name="$1"
+        local platform
+        platform=$(kd_get_platform)
+
+        local func_name="_${base_name}_${platform}"
+
+        # Check if platform-specific function exists
+        if command -v "$func_name" >/dev/null 2>&1; then
+            "$func_name"
+            return 0
+        else
+            kd_step_skip "platform $platform not supported"
+            return 1
+        fi
+    }
+
 
     # Step functions
     KD_CURRENT_STEP=""

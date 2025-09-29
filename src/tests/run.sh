@@ -83,6 +83,7 @@ if [ "$environment" = "termux" ]; then
         -p $HTTP_PORT:80 \
         --ulimit nofile=65536:65536 \
         -v "$(pwd)/../../bootstrap:/var/www/bootstrap:ro" \
+        -v "$(pwd)/lib:/lib:ro" \
         "$image_name" \
         sleep infinity 2>&1); then
         echo "✗ Container start failed:"
@@ -95,6 +96,7 @@ else
         --add-host="k.local:127.0.0.1" \
         -p $HTTP_PORT:80 \
         -v "$(pwd)/../../bootstrap:/var/www/bootstrap:ro" \
+        -v "$(pwd)/lib:/lib:ro" \
         "$image_name" \
         tail -f /dev/null 2>&1); then
         echo "✗ Container start failed:"

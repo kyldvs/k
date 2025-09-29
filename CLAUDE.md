@@ -16,6 +16,7 @@
 - No trailing whitespace
 - Consistent indentation (2 spaces for shell, configs)
 - POSIX-compliant shell when possible
+- Variable naming: `KD_*` for globals, lowercase for locals
 
 ### File Management
 - **NEVER create unnecessary files**
@@ -112,15 +113,34 @@ _needs_example() {
     [ ! -f ~/.example_installed ]
 }
 
-# Implementation (required)
+# Platform-specific implementations (optional)
+_example_termux() {
+    # Termux-specific logic
+    pkg install -y example
+}
+
+_example_ubuntu() {
+    # Ubuntu-specific logic
+    apt-get install -y example
+}
+
+# Main implementation (required)
 _example() {
     kd_step_start "example" "Installing example"
 
-    # Your logic here
-    touch ~/.example_installed
+    if ! _needs_example; then
+        kd_step_skip "example already installed"
+        return 0
+    fi
+
+    # Use platform dispatch for multi-platform support
+    kd_platform_dispatch "example"
 
     kd_step_end
 }
+
+# Self-execution (required)
+_example
 ```
 
 #### Best Practices
@@ -133,11 +153,23 @@ _example() {
 
 #### Utility Functions
 ```bash
+# Step management
 kd_step_start "name" "description"  # Begin step
 kd_step_end                         # Complete step
 kd_step_skip "reason"              # Skip with explanation
+
+# Logging
 kd_log "message"                   # Indented output
 kd_info/warn/error "msg"           # Colored messages
+
+# Platform detection
+kd_get_platform                    # Returns: termux, ubuntu, unknown
+kd_is_termux                       # Check if running on Termux
+kd_is_ubuntu                       # Check if running on Ubuntu
+
+# Platform dispatch (convention over configuration)
+kd_platform_dispatch "function"    # Calls _function_<platform>
+                                   # Auto-detects platform and dispatches
 ```
 
 ### Building & Testing
@@ -147,6 +179,41 @@ just bootstrap build-one vm  # Single config
 just test config termux      # Test specific
 just test all               # Full test suite
 ```
+
+### Platform Dispatch Pattern
+
+The codebase uses **convention over configuration** for platform-specific
+implementations. Instead of verbose case statements, use `kd_platform_dispatch`:
+
+```bash
+# OLD pattern (verbose, repetitive)
+_example() {
+    platform=$(kd_get_platform)
+    case "$platform" in
+        termux)
+            _example_termux
+            ;;
+        ubuntu)
+            _example_ubuntu
+            ;;
+        *)
+            kd_step_skip "platform not supported"
+            ;;
+    esac
+}
+
+# NEW pattern (DRY, convention-based)
+_example() {
+    kd_platform_dispatch "example"
+    # Automatically calls _example_termux or _example_ubuntu
+}
+```
+
+**Benefits:**
+- Eliminates repetitive case statements
+- Makes adding new platforms easier (just add `_name_platform` function)
+- Reduces boilerplate by ~10 lines per part
+- Self-documenting through naming convention
 
 ## Testing Infrastructure
 
@@ -159,6 +226,8 @@ just test all               # Full test suite
 ```
 src/tests/
 ├── run.sh              # Test orchestrator
+├── lib/               # Shared test utilities
+│   └── assertions.sh  # Common assertion helpers
 ├── images/            # Docker environments
 ├── tests/             # Test scripts
 └── fixtures/          # Test assets
@@ -167,17 +236,33 @@ src/tests/
 ### Writing Tests
 ```bash
 # src/tests/tests/example.test.sh
-test_example() {
-    # Arrange
-    setup_environment
+#!/usr/bin/env bash
+set -euo pipefail
 
-    # Act
-    run_bootstrap
+# Source shared assertion helpers
+. /lib/assertions.sh
 
-    # Assert
-    verify_idempotency
-    check_installation
-}
+echo "→ Testing example bootstrap script"
+
+# Test 1: Run bootstrap
+curl -fsSL http://k.local/example.sh | bash
+
+# Test 2: Verify installation
+assert_file "/path/to/installed/file"
+assert_command "example --version" "1.0.0"
+assert_file_contains "$HOME/.config" "example"
+
+# Test 3: Idempotency
+curl -fsSL http://k.local/example.sh | bash
+```
+
+### Test Assertion Helpers
+```bash
+assert_file "/path/to/file"              # File exists
+assert_symlink "link" "target"           # Symlink correct
+assert_command "cmd" "expected output"   # Command output matches
+assert_file_contains "file" "pattern"    # File contains pattern
+assert_command_exists "command"          # Command in PATH
 ```
 
 ### Platform-Specific Issues
@@ -223,11 +308,18 @@ just test config termux
 ## Workflow Patterns
 
 ### Adding New Feature
-1. Create part in `src/parts/feature.sh`
-2. Add to config `src/bootstrap/config.json`
-3. Build: `just bootstrap build`
-4. Test: `just test config <name>`
-5. Commit: `just vcs acp "feat: add feature"`
+1. Create part in `src/parts/feature.sh` following structure template
+2. Add platform-specific implementations (`_feature_termux`, etc.)
+3. Add to config `src/bootstrap/config.json`
+4. Build: `just bootstrap build`
+5. Test: `just test config <name>`
+6. Commit: `just vcs acp "feat: add feature"`
+
+### Adding New Platform
+1. Add platform detection to `kd_is_<platform>()` in util-functions.sh
+2. Update `kd_get_platform()` to return platform name
+3. Add `_<part>_<platform>()` implementations for needed parts
+4. Platform dispatch will automatically route to new implementations
 
 ### Fixing Bugs
 1. Reproduce in test environment
