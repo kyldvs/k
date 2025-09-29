@@ -4,43 +4,6 @@
 # Do not edit directly - edit parts and rebuild
 #
 
-#--- init-k ---#
-
-#!/bin/bash
-
-_needs_init_k() {
-    [ ! -d ~/.config/k ]
-}
-
-_init_k() {
-    kd_step_start "init-k" "Setting up ~/.config/k directory structure"
-
-    if ! _needs_init_k; then
-        kd_step_skip "~/.config/k directory already exists"
-        return 0
-    fi
-
-    kd_log "Creating ~/.config/k directory"
-    mkdir -p ~/.config/k
-
-    kd_log "Creating ~/.config/k/init.sh loader script"
-    cat > ~/.config/k/init.sh << 'EOF'
-# ~/.config/k/init.sh - Loader for all shell customizations
-# Sources all .sh files in ~/.config/k/ except init.sh itself
-
-for f in ~/.config/k/*.sh; do
-    [ -f "$f" ] && [ "$f" != ~/.config/k/init.sh ] && . "$f"
-done
-EOF
-
-    kd_step_end
-}
-
-_init_k
-
-#--- /init-k ---#
-
-
 #--- util-functions ---#
 
 _needs_util_functions() {
@@ -193,6 +156,43 @@ _util_functions() {
 _util_functions
 
 #--- /util-functions ---#
+
+
+#--- init-k ---#
+
+#!/bin/bash
+
+_needs_init_k() {
+    [ ! -d ~/.config/k ]
+}
+
+_init_k() {
+    kd_step_start "init-k" "Setting up ~/.config/k directory structure"
+
+    if ! _needs_init_k; then
+        kd_step_skip "~/.config/k directory already exists"
+        return 0
+    fi
+
+    kd_log "Creating ~/.config/k directory"
+    mkdir -p ~/.config/k
+
+    kd_log "Creating ~/.config/k/init.sh loader script"
+    cat > ~/.config/k/init.sh << 'EOF'
+# ~/.config/k/init.sh - Loader for all shell customizations
+# Sources all .sh files in ~/.config/k/ except init.sh itself
+
+for f in ~/.config/k/*.sh; do
+    [ -f "$f" ] && [ "$f" != ~/.config/k/init.sh ] && . "$f"
+done
+EOF
+
+    kd_step_end
+}
+
+_init_k
+
+#--- /init-k ---#
 
 
 #--- fake-sudo ---#
