@@ -1,8 +1,8 @@
 #!/bin/bash
 
 _needs_ssh_utils() {
-    # Check if ssh-utils.sh exists and has the ssha function
-    [ ! -f ~/.config/k/ssh-utils.sh ] || ! grep -q 'ssha()' ~/.config/k/ssh-utils.sh 2>/dev/null
+    # Check if ssh-utils.sh has the ssha function
+    ! grep -q 'ssha()' ~/.config/k/ssh-utils.sh 2>/dev/null
 }
 
 _ssh_utils() {
