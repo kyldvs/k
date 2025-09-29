@@ -1,5 +1,7 @@
 # `k` - kyldvs dotfiles
 
+Project uses Claude Code with specialized agents and workflows (`.claude/`).
+
 ## Core Principles
 
 ### Simplicity First
@@ -35,6 +37,32 @@ just vcs acp "msg"        # Add, commit, push (ALWAYS use this)
 # Development cycle
 just bootstrap build && just test all && just vcs acp "feat: xyz"
 ```
+
+## Claude Code Workflows
+
+Specialized agents, commands, and output styles in `.claude/` directory.
+
+### Available Agents
+- **code-finder** / **code-finder-advanced** - Locate code patterns
+- **implementor** - Precise implementation tasks
+- **root-cause-analyzer** - Systematic bug diagnosis
+- **backend-developer** / **frontend-ui-developer** - Domain-specific dev
+- **library-docs-writer** - Documentation generation
+
+### Available Commands
+- `/better-init` - Create/improve CLAUDE.md
+- `/orchestrate` - Multi-agent orchestration mode
+- `/git` - Documentation & commit workflows
+- `/fix-build` - Systematic build error fixing
+- `/research/deep` - Asymmetric research methodology
+- `/execute/implement-plan` - Structured plan implementation
+
+### Output Styles
+- **main** - Senior developer approach with agent delegation
+- **planning** - Strategic planning methodology
+- **deep-research** - Evidence-based research mode
+
+See `.claude/README.md` for details.
 
 ## Architecture Overview
 
@@ -304,6 +332,38 @@ just test config termux
 - Use quotes around variables
 - Prefer absolute paths
 - Check file permissions
+
+### Agent Delegation
+**When to use agents:**
+- Complex features with intricate business logic
+- Parallel tasks (2+ independent changes)
+- Large code investigations
+- Implementing multi-step plans
+
+**When to work directly:**
+- Small scope (1-4 files)
+- Active debugging (rapid iteration)
+- Quick fixes
+
+**Agent prompt structure:**
+- Specify files to read for patterns
+- List target files to modify
+- Define boundaries with other tasks
+- Provide expected output format
+
+**For parallel work:**
+- Implement shared dependencies first (types, interfaces)
+- Launch agents with clear boundaries
+- Use specialized agents (backend-developer, frontend-ui-developer)
+
+### Code Standards
+- Study neighboring files first - patterns emerge from existing code
+- Extend existing components - leverage what works before creating new
+- Match established conventions - consistency trumps personal preference
+- Use precise types - research actual types instead of `any`
+- Fail fast with clear errors - early failures prevent hidden bugs
+- Edit over create - modify existing files to maintain structure
+- Code speaks for itself - comments only when explicitly requested
 
 ## Workflow Patterns
 
