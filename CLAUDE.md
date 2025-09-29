@@ -1,104 +1,250 @@
 # `k` - kyldvs dotfiles
 
+## Core Principles
+
+### Simplicity First
+- **Keep it simple** - avoid complexity unless absolutely necessary
+- **Single responsibility** - each component does one thing well
+- **Explicit over implicit** - clear intent in code and configuration
+- **Fail fast** - validate early, error clearly
+- **DRY** - reuse through functions and modules
+
+### Code Style
+- **Be extremely terse and concise always**
+- 80 char line limit (readability > density)
+- Newline at EOF
+- No trailing whitespace
+- Consistent indentation (2 spaces for shell, configs)
+- POSIX-compliant shell when possible
+
+### File Management
+- **NEVER create unnecessary files**
+- **ALWAYS prefer editing existing over creating new**
+- No proactive documentation - only on explicit request
+- Keep directory structure flat and obvious
+
 ## Quick Reference
 
-### Most Used Commands
 ```bash
-just bootstrap build        # Build all bootstrap scripts
-just test all              # Test all configurations
-just vcs acp "msg"         # Add, commit, push (prefer over git)
+# Most used commands
+just bootstrap build       # Build all bootstrap scripts
+just test all             # Test all configurations
+just vcs acp "msg"        # Add, commit, push (ALWAYS use this)
+
+# Development cycle
+just bootstrap build && just test all && just vcs acp "feat: xyz"
 ```
 
-## General Instructions
+## Architecture Overview
 
-- **Be extremely terse and concise always**
-- Include newline at end of files
-- Limit line length to 80 chars
-- No unnecessary files - prefer editing existing over creating new
+```
+.
+├── bootstrap/           # Generated scripts (DO NOT EDIT)
+├── src/
+│   ├── bootstrap/      # JSON configs defining which parts
+│   ├── parts/         # Reusable shell functions
+│   └── tests/         # Docker-based test infrastructure
+├── tasks/             # Justfile modules
+└── justfile           # Main entry point
+```
 
 ## Version Control
 
-### Git Workflow
+### Commit Workflow
 - **ALWAYS** use: `just vcs acp "commit message"`
-- Conventional commit style (feat:, fix:, docs:, etc.)
-- One-line commit messages only
-- Git hooks handled by just (`.husky/pre-commit` → `just hooks pre-commit`)
+- Never use raw git commands for commits
+- Conventional commits: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`
+- Single-line messages only
+- Atomic commits - one logical change per commit
 
-## Justfile Organization
+### Git Hooks
+- Pre-commit: `just hooks pre-commit`
+- Managed through Husky
+- Auto-runs linting, tests before commit
 
-### Structure
-- Main `justfile`: general recipes + module imports
-- Modules: `tasks/*/justfile` with `mod name "tasks/name"`
+## Justfile System
 
-### Recipe Rules
-- All recipes: use `[no-cd]` attribute
-- Silent by default: prefix with `@`
-- Bash recipes: no `@` prefix (reverses behavior)
+### Design Principles
+- Modular organization via `mod` imports
+- All recipes use `[no-cd]` - explicit paths only
+- Silent by default (`@` prefix)
+- Bash recipes inverse (`#!/usr/bin/env bash`)
+
+### Module Structure
+```
+justfile              # Main recipes + imports
+tasks/*/justfile     # Module-specific recipes
+```
+
+### Writing Recipes
+```just
+[no-cd]               # Required on all recipes
+@recipe-name param:   # Silent execution
+  command {{param}}
+
+[no-cd]
+script-recipe:        # Verbose bash script
+  #!/usr/bin/env bash
+  set -euo pipefail   # Always use strict mode
+  echo "Visible output"
+```
 
 ## Bootstrap System
 
-Modular system for compiling reusable setup scripts.
+### Overview
+Modular compilation system for environment setup scripts.
 
-### Directory Structure
-```
-src/parts/*.sh          # Individual components (functions)
-src/bootstrap/*.json    # Configs specifying which parts
-tasks/bootstrap/        # Build system and templates
-bootstrap/*.sh          # Generated scripts (DO NOT EDIT)
-```
+### Components
+- **Parts**: Individual setup functions (`src/parts/*.sh`)
+- **Configs**: JSON files listing parts (`src/bootstrap/*.json`)
+- **Builder**: Compiles parts into scripts (`tasks/bootstrap/`)
+- **Output**: Generated scripts (`bootstrap/*.sh`)
 
 ### Creating Parts
-1. Create `src/parts/part-name.sh` with `_part_name()` function
-2. Add `_needs_part_name()` for idempotency checks
-3. Use `return` not `exit` (compiled context)
-4. Must be non-interactive (no prompts/read)
-5. Add to JSON config in `src/bootstrap/`
-6. Build: `just bootstrap build`
 
-### Part Functions
+#### Structure Requirements
 ```bash
-kd_step_start "name" "desc"  # Start step (always first)
-kd_step_end                   # Complete step
-kd_step_skip "reason"         # Skip with reason
-kd_log "message"              # Indented output
-```
-- Use `~/path` not `$HOME/path`
-- Step names: dash-case (`"fake-sudo"`)
+# src/parts/example.sh
 
-## Testing System
+# Idempotency check (required)
+_needs_example() {
+    # Return 0 if needed, 1 if already done
+    [ ! -f ~/.example_installed ]
+}
 
-Docker-based testing for bootstrap scripts.
+# Implementation (required)
+_example() {
+    kd_step_start "example" "Installing example"
 
-### Commands
-```bash
-just test all              # Test all configs
-just test config termux    # Test specific config
-just test clean           # Clean containers
+    # Your logic here
+    touch ~/.example_installed
+
+    kd_step_end
+}
 ```
 
-### Custom Build Scripts
-- Create `src/tests/images/{env}/build.sh` for custom Docker build
-- Automatically used if present
-- Example: Termux uses ulimit workaround
+#### Best Practices
+- Use `return` not `exit` (runs in compiled context)
+- Non-interactive only (no prompts/read)
+- Idempotent - safe to run multiple times
+- Use utility functions for logging
+- Validate prerequisites first
+- Clean error messages
 
-### Termux-Specific Issues
-- DNS fails due to dnsmasq file descriptor bug
-- Fix: `--ulimit nofile=65536:65536` flag
-- Container needs root for DNS, but pkg needs system user
-- Use `--user system` with docker exec commands
+#### Utility Functions
+```bash
+kd_step_start "name" "description"  # Begin step
+kd_step_end                         # Complete step
+kd_step_skip "reason"              # Skip with explanation
+kd_log "message"                   # Indented output
+kd_info/warn/error "msg"           # Colored messages
+```
 
-### Test Requirements
-- Python HTTP server for bootstrap delivery
-- Tests must verify idempotency
-- Use absolute paths in symlinks
+### Building & Testing
+```bash
+just bootstrap build         # Compile all configs
+just bootstrap build-one vm  # Single config
+just test config termux      # Test specific
+just test all               # Full test suite
+```
 
-## Development Workflow
+## Testing Infrastructure
 
-### Standard Flow
-1. `just bootstrap build` - Build scripts
-2. `just test all` - Run tests
-3. `just vcs acp "feat: description"` - Commit & push
+### Docker-Based Testing
+- Isolated environments per config
+- Idempotency verification
+- Network server for bootstrap delivery
 
-### Planning Tasks
-- Always include final step: `just vcs acp`
-- Use TodoWrite tool for complex multi-step tasks
+### Test Structure
+```
+src/tests/
+├── run.sh              # Test orchestrator
+├── images/            # Docker environments
+├── tests/             # Test scripts
+└── fixtures/          # Test assets
+```
+
+### Writing Tests
+```bash
+# src/tests/tests/example.test.sh
+test_example() {
+    # Arrange
+    setup_environment
+
+    # Act
+    run_bootstrap
+
+    # Assert
+    verify_idempotency
+    check_installation
+}
+```
+
+### Platform-Specific Issues
+
+#### Termux
+- DNS resolution requires ulimit fix
+- User switching: root for DNS, system for pkg
+- Custom build script in `src/tests/images/termux/build.sh`
+
+## Development Practices
+
+### Error Handling
+- Set strict mode: `set -euo pipefail`
+- Validate inputs early
+- Meaningful error messages
+- Exit codes: 0=success, 1=error, 2=usage
+
+### Debugging
+```bash
+# Enable debug output
+export KD_DEBUG=1
+
+# Disable colors for logs
+export KD_NO_COLOR=1
+
+# Test single component
+just test config termux
+```
+
+### Performance
+- Minimize subprocess spawning
+- Cache expensive operations
+- Batch file operations
+- Use native shell features when possible
+
+### Security
+- Never commit secrets/credentials
+- Validate all user input
+- Use quotes around variables
+- Prefer absolute paths
+- Check file permissions
+
+## Workflow Patterns
+
+### Adding New Feature
+1. Create part in `src/parts/feature.sh`
+2. Add to config `src/bootstrap/config.json`
+3. Build: `just bootstrap build`
+4. Test: `just test config <name>`
+5. Commit: `just vcs acp "feat: add feature"`
+
+### Fixing Bugs
+1. Reproduce in test environment
+2. Fix in `src/parts/`
+3. Verify: `just test all`
+4. Commit: `just vcs acp "fix: description"`
+
+### Refactoring
+1. Make changes
+2. Run full test suite
+3. Verify idempotency
+4. Commit: `just vcs acp "refactor: description"`
+
+## Important Reminders
+
+- **Simplicity > Cleverness** - maintainable code wins
+- **Test everything** - especially idempotency
+- **Document intent** - why, not what
+- **Fail gracefully** - helpful error messages
+- **Stay consistent** - follow established patterns
