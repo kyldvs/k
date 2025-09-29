@@ -1,27 +1,27 @@
 #!/bin/bash
 
 _needs_init_k() {
-    [ ! -d ~/.k ]
+    [ ! -d ~/.config/k ]
 }
 
 _init_k() {
-    kd_step_start "init-k" "Setting up ~/.k directory structure"
+    kd_step_start "init-k" "Setting up ~/.config/k directory structure"
 
     if ! _needs_init_k; then
-        kd_step_skip "~/.k directory already exists"
+        kd_step_skip "~/.config/k directory already exists"
         return 0
     fi
 
-    kd_log "Creating ~/.k directory"
-    mkdir -p ~/.k
+    kd_log "Creating ~/.config/k directory"
+    mkdir -p ~/.config/k
 
-    kd_log "Creating ~/.k/init.sh loader script"
-    cat > ~/.k/init.sh << 'EOF'
-# ~/.k/init.sh - Loader for all shell customizations
-# Sources all .sh files in ~/.k/ except init.sh itself
+    kd_log "Creating ~/.config/k/init.sh loader script"
+    cat > ~/.config/k/init.sh << 'EOF'
+# ~/.config/k/init.sh - Loader for all shell customizations
+# Sources all .sh files in ~/.config/k/ except init.sh itself
 
-for f in ~/.k/*.sh; do
-    [ -f "$f" ] && [ "$f" != ~/.k/init.sh ] && . "$f"
+for f in ~/.config/k/*.sh; do
+    [ -f "$f" ] && [ "$f" != ~/.config/k/init.sh ] && . "$f"
 done
 EOF
 

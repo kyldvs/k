@@ -9,27 +9,27 @@
 #!/bin/bash
 
 _needs_init_k() {
-    [ ! -d ~/.k ]
+    [ ! -d ~/.config/k ]
 }
 
 _init_k() {
-    kd_step_start "init-k" "Setting up ~/.k directory structure"
+    kd_step_start "init-k" "Setting up ~/.config/k directory structure"
 
     if ! _needs_init_k; then
-        kd_step_skip "~/.k directory already exists"
+        kd_step_skip "~/.config/k directory already exists"
         return 0
     fi
 
-    kd_log "Creating ~/.k directory"
-    mkdir -p ~/.k
+    kd_log "Creating ~/.config/k directory"
+    mkdir -p ~/.config/k
 
-    kd_log "Creating ~/.k/init.sh loader script"
-    cat > ~/.k/init.sh << 'EOF'
-# ~/.k/init.sh - Loader for all shell customizations
-# Sources all .sh files in ~/.k/ except init.sh itself
+    kd_log "Creating ~/.config/k/init.sh loader script"
+    cat > ~/.config/k/init.sh << 'EOF'
+# ~/.config/k/init.sh - Loader for all shell customizations
+# Sources all .sh files in ~/.config/k/ except init.sh itself
 
-for f in ~/.k/*.sh; do
-    [ -f "$f" ] && [ "$f" != ~/.k/init.sh ] && . "$f"
+for f in ~/.config/k/*.sh; do
+    [ -f "$f" ] && [ "$f" != ~/.config/k/init.sh ] && . "$f"
 done
 EOF
 
@@ -241,24 +241,24 @@ _fake_sudo
 #--- init-profile ---#
 
 _needs_profile_init() {
-    ! grep -q '. ~/.k/init.sh' ~/.profile 2>/dev/null
+    ! grep -q '. ~/.config/k/init.sh' ~/.profile 2>/dev/null
 }
 
 _init_profile() {
     kd_step_start "init-profile" "Setting up .profile"
 
     if ! _needs_profile_init; then
-        kd_step_skip "~/.k/init.sh already sourced in profile"
+        kd_step_skip "~/.config/k/init.sh already sourced in profile"
         return 0
     fi
 
     # Create .profile if it doesn't exist
     [ ! -f ~/.profile ] && echo "# POSIX compliant profile with common setup" > ~/.profile
 
-    kd_log "Adding ~/.k/init.sh source line to ~/.profile"
+    kd_log "Adding ~/.config/k/init.sh source line to ~/.profile"
     echo "" >> ~/.profile
-    echo "# Source shell customizations from ~/.k/" >> ~/.profile
-    echo ". ~/.k/init.sh" >> ~/.profile
+    echo "# Source shell customizations from ~/.config/k/" >> ~/.profile
+    echo ". ~/.config/k/init.sh" >> ~/.profile
 
     kd_step_end
 }
@@ -368,7 +368,7 @@ _mosh
 #!/bin/bash
 
 _needs_ssh_utils() {
-    [ ! -f ~/.k/ssh-utils.sh ]
+    [ ! -f ~/.config/k/ssh-utils.sh ]
 }
 
 _ssh_utils() {
@@ -379,9 +379,9 @@ _ssh_utils() {
         return
     fi
 
-    kd_log "Creating ~/.k/ssh-utils.sh"
+    kd_log "Creating ~/.config/k/ssh-utils.sh"
 
-    cat > ~/.k/ssh-utils.sh << 'EOF'
+    cat > ~/.config/k/ssh-utils.sh << 'EOF'
 # SSH agent wrapper functions
 ssha() {
     # Check if agent running

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 _needs_ssh_utils() {
-    [ ! -f ~/.k/ssh-utils.sh ]
+    [ ! -f ~/.config/k/ssh-utils.sh ]
 }
 
 _ssh_utils() {
@@ -12,9 +12,9 @@ _ssh_utils() {
         return
     fi
 
-    kd_log "Creating ~/.k/ssh-utils.sh"
+    kd_log "Creating ~/.config/k/ssh-utils.sh"
 
-    cat > ~/.k/ssh-utils.sh << 'EOF'
+    cat > ~/.config/k/ssh-utils.sh << 'EOF'
 # SSH agent wrapper functions
 ssha() {
     # Check if agent running

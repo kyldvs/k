@@ -94,19 +94,19 @@ assert_command_exists "mosh"
 
 # Test 6: Check ssh-utils setup
 echo "→ Testing ssh-utils setup"
-assert_file "$HOME/.k/ssh-utils.sh"
-assert_file_contains "$HOME/.k/ssh-utils.sh" "ssha()"
-assert_file_contains "$HOME/.k/ssh-utils.sh" "mosha()"
+assert_file "$HOME/.config/k/ssh-utils.sh"
+assert_file_contains "$HOME/.config/k/ssh-utils.sh" "ssha()"
+assert_file_contains "$HOME/.config/k/ssh-utils.sh" "mosha()"
 
-# Test 7: Check .k directory structure
-echo "→ Testing .k directory structure"
-assert_file "$HOME/.k/ssh-utils.sh"
+# Test 7: Check .config/k directory structure
+echo "→ Testing .config/k directory structure"
+assert_file "$HOME/.config/k/ssh-utils.sh"
 
 # Test 8: Idempotency test - run again
 echo "→ Testing idempotency (running script again)"
 curl -fsSL http://k.local/vm.sh | bash
 assert_file "$HOME/bin/sudo"
 assert_symlink "$HOME/bin/sudo" "$HOME/fake-sudo/sudo"
-assert_file "$HOME/.k/ssh-utils.sh"
+assert_file "$HOME/.config/k/ssh-utils.sh"
 
 echo "✓ All vm bootstrap tests passed"
