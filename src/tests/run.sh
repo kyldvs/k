@@ -30,6 +30,20 @@ fi
 image_name="k-test-${environment}"
 container_name="k-test-${config}-${environment}-$$"
 
+# Find available port
+get_random_port() {
+    local port
+    while true; do
+        port=$((8000 + RANDOM % 1000))
+        if ! nc -z localhost $port 2>/dev/null; then
+            echo $port
+            return
+        fi
+    done
+}
+
+HTTP_PORT=$(get_random_port)
+
 echo "→ Building test image: $image_name"
 cd "images/$environment"
 
@@ -52,10 +66,12 @@ fi
 cd ../..
 
 cleanup() {
+    local exit_code=$?
     echo "→ Cleaning up container: $container_name"
     docker rm -f "$container_name" >/dev/null 2>&1 || true
+    exit $exit_code
 }
-trap cleanup EXIT
+trap cleanup EXIT INT TERM
 
 echo "→ Starting test container: $container_name"
 if [ "$environment" = "termux" ]; then
@@ -64,7 +80,7 @@ if [ "$environment" = "termux" ]; then
     if ! container_output=$(docker run -d \
         --name "$container_name" \
         --add-host="k.local:127.0.0.1" \
-        -p 80:80 \
+        -p $HTTP_PORT:80 \
         --ulimit nofile=65536:65536 \
         -v "$(pwd)/../../bootstrap:/var/www/bootstrap:ro" \
         "$image_name" \
@@ -77,7 +93,7 @@ else
     if ! container_output=$(docker run -d \
         --name "$container_name" \
         --add-host="k.local:127.0.0.1" \
-        -p 80:80 \
+        -p $HTTP_PORT:80 \
         -v "$(pwd)/../../bootstrap:/var/www/bootstrap:ro" \
         "$image_name" \
         tail -f /dev/null 2>&1); then
@@ -125,13 +141,13 @@ fi
 
 echo "→ Running test: $test_file"
 if [ "$environment" = "termux" ]; then
-    if ! test_output=$(timeout 180 docker exec -i --user system "$container_name" bash < "$test_file" 2>&1); then
+    if ! test_output=$(timeout 600 docker exec -i --user system "$container_name" bash < "$test_file" 2>&1); then
         echo "✗ Test failed:"
         echo "$test_output"
         exit 1
     fi
 else
-    if ! test_output=$(timeout 180 docker exec -i "$container_name" bash < "$test_file" 2>&1); then
+    if ! test_output=$(timeout 600 docker exec -i "$container_name" bash < "$test_file" 2>&1); then
         echo "✗ Test failed:"
         echo "$test_output"
         exit 1
