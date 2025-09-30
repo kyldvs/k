@@ -19,3 +19,7 @@ npm-debug.log*
 
 # k bootstrap config (user-specific)
 .config/kyldvs/k/configure.json
+
+# test fixtures (DO NOT commit test SSH keys)
+src/tests/fixtures/test-ssh-key
+src/tests/fixtures/test-ssh-key.pub

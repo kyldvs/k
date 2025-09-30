@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  mock-vm:
+    image: k-test-mock-vm
+    container_name: k-test-mock-vm
+    build:
+      context: ../..
+      dockerfile: src/tests/images/mock-vm/Dockerfile
+    networks:
+      - mobile-test-network
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "22"]
+      interval: 2s
+      timeout: 1s
+      retries: 10
+      start_period: 5s
+
+  termux-test:
+    image: k-test-termux
+    container_name: k-test-termux
+    build:
+      context: ../..
+      dockerfile: src/tests/images/termux/Dockerfile
+    networks:
+      - mobile-test-network
+    depends_on:
+      mock-vm:
+        condition: service_healthy
+    volumes:
+      - ../../bootstrap:/var/www/bootstrap:ro
+      - ./lib:/lib:ro
+      - ./fixtures:/fixtures:ro
+    ulimit:
+      nofile:
+        soft: 65536
+        hard: 65536
+    extra_hosts:
+      - "k.local:127.0.0.1"
+    command: sleep infinity
+
+networks:
+  mobile-test-network:
+    driver: bridge

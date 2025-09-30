@@ -22,7 +22,18 @@ config name environment="termux":
   @cd src/tests && ./run.sh {{name}} {{environment}}
 
 [no-cd]
+mobile platform="termux":
+  @echo "Testing mobile bootstrap on {{platform}}..."
+  @cd src/tests && ./run-mobile.sh {{platform}}
+
+[no-cd]
+mobile-clean:
+  @echo "Cleaning up mobile test containers and volumes..."
+  @docker-compose -f src/tests/docker-compose.mobile.yml -p k-mobile-test down -v 2>/dev/null || true
+
+[no-cd]
 clean:
   @echo "Cleaning up test containers and images..."
   @docker ps -a --filter "name=k-test-*" -q | xargs -r docker rm -f
   @docker images -q "k-test-*" | xargs -r docker rmi -f
+  @just test mobile-clean

@@ -1,0 +1,13 @@
+{
+  "doppler": {
+    "project": "test-project",
+    "env": "test",
+    "ssh_key_public": "SSH_GH_VM_PUBLIC",
+    "ssh_key_private": "SSH_GH_VM_PRIVATE"
+  },
+  "vm": {
+    "hostname": "mock-vm",
+    "port": 22,
+    "username": "testuser"
+  }
+}

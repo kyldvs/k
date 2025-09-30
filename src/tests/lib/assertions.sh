@@ -61,3 +61,38 @@ assert_command_exists() {
     fi
     echo "✓ Command exists: $cmd"
 }
+
+assert_file_perms() {
+    local file="$1"
+    local expected_perms="$2"
+    if [ ! -e "$file" ]; then
+        echo "✗ FAIL: File $file does not exist"
+        exit 1
+    fi
+    local actual_perms
+    actual_perms=$(stat -c "%a" "$file" 2>/dev/null || stat -f "%Lp" "$file" 2>/dev/null)
+    if [ "$actual_perms" != "$expected_perms" ]; then
+        echo "✗ FAIL: File $file has permissions $actual_perms, expected $expected_perms"
+        exit 1
+    fi
+    echo "✓ File permissions correct: $file ($expected_perms)"
+}
+
+assert_command_succeeds() {
+    local cmd="$1"
+    if ! eval "$cmd" >/dev/null 2>&1; then
+        echo "✗ FAIL: Command failed: $cmd"
+        exit 1
+    fi
+    echo "✓ Command succeeded: $cmd"
+}
+
+assert_no_errors() {
+    local output="$1"
+    if echo "$output" | grep -qi "ERROR"; then
+        echo "✗ FAIL: Found ERROR in output:"
+        echo "$output" | grep -i "ERROR"
+        exit 1
+    fi
+    echo "✓ No errors found in output"
+}
