@@ -3,10 +3,16 @@ set shell := ["bash", "-uc"]
 set ignore-comments
 
 [no-cd]
-acp msg:
+cm msg:
   #!/usr/bin/env bash
   set -euo pipefail
 
   git add -A
   git commit -m "{{msg}}"
+
+[no-cd]
+push:
+  #!/usr/bin/env bash
+  set -euo pipefail
+
   git push

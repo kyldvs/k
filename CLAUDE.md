@@ -36,10 +36,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Most used commands
 just bootstrap build       # Build all bootstrap scripts
 just test all             # Test all configurations
-just vcs acp "msg"        # Add, commit, push (ALWAYS use this)
+just vcs cm "msg"         # Add and commit
+just vcs push             # Push to remote
 
 # Development cycle
-just bootstrap build && just test all && just vcs acp "feat: xyz"
+just bootstrap build && just test all && just vcs cm "feat: xyz" && just vcs push
 ```
 
 ## Architecture Overview
@@ -58,7 +59,8 @@ just bootstrap build && just test all && just vcs acp "feat: xyz"
 ## Version Control
 
 ### Commit Workflow
-- **ALWAYS** use: `just vcs acp "commit message"`
+- **ALWAYS** use: `just vcs cm "commit message"` then `just vcs push`
+- Or combine: `just vcs cm "msg" && just vcs push`
 - Never use raw git commands for commits
 - Conventional commits: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`
 - Single-line messages only
@@ -311,7 +313,7 @@ just test config termux
 3. Add to config `src/bootstrap/config.json`
 4. Build: `just bootstrap build`
 5. Test: `just test config <name>`
-6. Commit: `just vcs acp "feat: add feature"`
+6. Commit: `just vcs cm "feat: add feature" && just vcs push`
 
 ### Adding New Platform
 1. Add platform detection to `kd_is_<platform>()` in util-functions.sh
@@ -323,10 +325,10 @@ just test config termux
 1. Reproduce in test environment
 2. Fix in `src/parts/`
 3. Verify: `just test all`
-4. Commit: `just vcs acp "fix: description"`
+4. Commit: `just vcs cm "fix: description" && just vcs push`
 
 ### Refactoring
 1. Make changes
 2. Run full test suite
 3. Verify idempotency
-4. Commit: `just vcs acp "refactor: description"`
+4. Commit: `just vcs cm "refactor: description" && just vcs push`

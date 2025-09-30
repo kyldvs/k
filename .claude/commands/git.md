@@ -1,15 +1,19 @@
 ---
 description: Git commit and push workflow with pre-commit hooks
-allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(just vcs acp:*)
+allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(just vcs cm:*), Bash(just vcs push:*)
 ---
 
 Changes are complete. Time to commit and push.
 
 ## Quick Workflow
 
-**ALWAYS use:** `just vcs acp "commit message"`
+**Two-step workflow:**
+1. `just vcs cm "commit message"` - Add and commit
+2. `just vcs push` - Push to remote
 
-This handles add, commit, and push in one command with pre-commit hooks.
+**Or combine:** `just vcs cm "commit message" && just vcs push`
+
+Pre-commit hooks run automatically during commit.
 
 ## Pre-Commit Checklist
 
@@ -37,10 +41,10 @@ Conventional commits: `type: description`
 
 **Examples:**
 ```bash
-just vcs acp "feat: add git installation to bootstrap"
-just vcs acp "fix: correct idempotency check in init-k"
-just vcs acp "docs: update CLAUDE.md with new patterns"
-just vcs acp "refactor: improve platform dispatch pattern"
+just vcs cm "feat: add git installation to bootstrap" && just vcs push
+just vcs cm "fix: correct idempotency check in init-k" && just vcs push
+just vcs cm "docs: update CLAUDE.md with new patterns" && just vcs push
+just vcs cm "refactor: improve platform dispatch pattern" && just vcs push
 ```
 
 ## Analysis Phase
