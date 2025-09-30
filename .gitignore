@@ -16,3 +16,6 @@ npm-debug.log*
 
 # use pnpm, not npm
 .package-lock.json
+
+# k bootstrap config (user-specific)
+.config/kyldvs/k/configure.json

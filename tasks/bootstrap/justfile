@@ -1,3 +1,7 @@
+# DEPRECATED: Part-based compilation system replaced by config-driven approach
+# The new system uses bootstrap/configure.sh + bootstrap/termux.sh
+# These recipes are kept for reference only
+
 set fallback := true
 set shell := ["bash", "-uc"]
 set ignore-comments

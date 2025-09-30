@@ -31,12 +31,12 @@ This implementation replaces the existing part-based compilation system with a c
 ## Task Breakdown
 
 ### Phase 1: Foundation & Configuration System
-- [ ] Task 1.1: Create configuration directory structure
+- [x] Task 1.1: Create configuration directory structure
   - Files: N/A (runtime only)
   - Dependencies: None
   - Details: Ensure `~/.config/kyldvs/k/` exists with proper permissions (700)
 
-- [ ] Task 1.2: Create interactive configure script
+- [x] Task 1.2: Create interactive configure script
   - Files: `bootstrap/configure.sh`
   - Dependencies: None
   - Details: Prompts for config values (VM, Doppler project/env, SSH key names), writes JSON, sets permissions (600)
@@ -44,34 +44,34 @@ This implementation replaces the existing part-based compilation system with a c
   - Pattern: Follow `util-functions.sh` style for consistency
   - Note: Does NOT prompt for Doppler token - handled via `doppler login`
 
-- [ ] Task 1.3: Add JSON schema validation helper
+- [x] Task 1.3: Add JSON schema validation helper
   - Files: `bootstrap/configure.sh` (embedded function)
   - Dependencies: Task 1.2
   - Details: Validate required fields exist before saving config
 
 ### Phase 2: Config-Driven Bootstrap Script
-- [ ] Task 2.1: Create new termux.sh with config loading
+- [x] Task 2.1: Create new termux.sh with config loading
   - Files: `bootstrap/termux.sh`
   - Dependencies: Task 1.2
   - Details: Load config from JSON, validate presence, parse with jq
   - Implementation: Start from scratch (don't compile from parts)
   - Pattern: Use kd_step_* functions for consistency with old system
 
-- [ ] Task 2.2: Implement Termux package installation
+- [x] Task 2.2: Implement Termux package installation
   - Files: `bootstrap/termux.sh`
   - Dependencies: Task 2.1
   - Details: Install openssh, mosh, jq using pkg
   - Implementation: Check if packages installed before attempting install
   - Pattern: Idempotent checks similar to `_needs_*` pattern
 
-- [ ] Task 2.3: Implement Doppler CLI installation
+- [x] Task 2.3: Implement Doppler CLI installation
   - Files: `bootstrap/termux.sh`
   - Dependencies: Task 2.2
   - Details: Install Doppler CLI for Termux environment
   - Implementation: Use Doppler's official install script or direct download
   - Pattern: Follow existing `doppler.sh` patterns but inline
 
-- [ ] Task 2.4: Implement Doppler authentication check
+- [x] Task 2.4: Implement Doppler authentication check
   - Files: `bootstrap/termux.sh`
   - Dependencies: Task 2.3
   - Details: Check if Doppler is authenticated, prompt user if not
@@ -79,28 +79,28 @@ This implementation replaces the existing part-based compilation system with a c
   - Pattern: If not authenticated, display clear message to run `doppler login` and exit
   - Message: "Please run 'doppler login' to authenticate, then re-run this script"
 
-- [ ] Task 2.5: Implement SSH key retrieval from Doppler
+- [x] Task 2.5: Implement SSH key retrieval from Doppler
   - Files: `bootstrap/termux.sh`
   - Dependencies: Task 2.4
   - Details: Fetch SSH_GH_VM_PUBLIC/PRIVATE from Doppler, write to ~/.ssh/
   - Implementation: Create ~/.ssh with 700, write keys with 600/644 perms
   - Pattern: Use doppler secrets get with project/env from config
 
-- [ ] Task 2.6: Implement SSH config generation
+- [x] Task 2.6: Implement SSH config generation
   - Files: `bootstrap/termux.sh`
   - Dependencies: Task 2.5
   - Details: Create ~/.ssh/config with VM host entry
   - Implementation: Generate config with hostname, port, user, IdentityFile
   - Pattern: Append to existing config if present, don't overwrite
 
-- [ ] Task 2.7: Implement SSH connection test
+- [x] Task 2.7: Implement SSH connection test
   - Files: `bootstrap/termux.sh`
   - Dependencies: Task 2.6
   - Details: Test SSH connection to VM without actually connecting
   - Implementation: `ssh -q -o BatchMode=yes -o ConnectTimeout=5 vm exit`
   - Pattern: Non-interactive, clear error messages on failure
 
-- [ ] Task 2.8: Implement success message and next steps
+- [x] Task 2.8: Implement success message and next steps
   - Files: `bootstrap/termux.sh`
   - Dependencies: Task 2.7
   - Details: Display connection commands (ssha vm, mosha vm)
@@ -108,7 +108,7 @@ This implementation replaces the existing part-based compilation system with a c
   - Pattern: Follow `termux-next-steps.sh` style
 
 ### Phase 3: VM Bootstrap Stub
-- [ ] Task 3.1: Create vm.sh placeholder
+- [x] Task 3.1: Create vm.sh placeholder
   - Files: `bootstrap/vm.sh`
   - Dependencies: None
   - Details: Create stub with clear "future work" message
@@ -116,20 +116,20 @@ This implementation replaces the existing part-based compilation system with a c
   - Pattern: Same header style as termux.sh
 
 ### Phase 4: Integration & Cleanup
-- [ ] Task 4.1: Update .gitignore for user configs
+- [x] Task 4.1: Update .gitignore for user configs
   - Files: `.gitignore`
   - Dependencies: None
   - Details: Add `~/.config/kyldvs/k/configure.json` pattern
   - Implementation: Actually add `.config/kyldvs/k/configure.json` (relative pattern)
 
-- [ ] Task 4.2: Add README documentation
+- [x] Task 4.2: Add README documentation
   - Files: `README.md`
   - Dependencies: Tasks 1.2, 2.8
   - Details: Document curl-pipe workflow and usage examples
   - Implementation: Add "Quick Start" section with curl commands
   - Pattern: Keep minimal, focus on getting started
 
-- [ ] Task 4.3: Mark old system as deprecated
+- [x] Task 4.3: Mark old system as deprecated
   - Files: `src/bootstrap/*.json`, `tasks/bootstrap/justfile`
   - Dependencies: None
   - Details: Add deprecation comments, keep for reference

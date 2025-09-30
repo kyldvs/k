@@ -2,12 +2,33 @@
 
 dotfiles
 
-## Bootstrap
+## Quick Start
 
-### Termux
+### Termux Bootstrap
 
-Run this to setup Termux:
-
+1. **Configure** (one-time setup):
 ```bash
-curl -sSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/termux.sh | bash
+curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/configure.sh | sh
+```
+
+2. **Bootstrap** your Termux environment:
+```bash
+curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/termux.sh | sh
+```
+
+3. **Authenticate** with Doppler when prompted:
+```bash
+~/bin/doppler login
+```
+
+4. **Re-run** bootstrap after authentication:
+```bash
+curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/termux.sh | sh
+```
+
+5. **Connect** to your VM:
+```bash
+ssh vm
+# or
+mosh vm
 ```
