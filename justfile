@@ -9,7 +9,6 @@ set ignore-comments
   just --list
 
 mod hooks "tasks/hooks"
-mod bootstrap "tasks/bootstrap"
 mod test "tasks/test"
 mod vcs "tasks/vcs"
 

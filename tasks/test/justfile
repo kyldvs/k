@@ -3,23 +3,8 @@ set shell := ["bash", "-uc"]
 
 [no-cd]
 all:
-  #!/usr/bin/env bash
-  set -euo pipefail
-
-  echo "Running all tests..."
-  for config_file in src/bootstrap/*.json; do
-    if [ -f "$config_file" ]; then
-      config_name=$(basename "$config_file" .json)
-      echo "Testing $config_name..."
-      cd src/tests && ./run.sh "$config_name"
-      cd ../..
-    fi
-  done
-
-[no-cd]
-config name environment="termux":
-  @echo "Testing {{name}} on {{environment}}..."
-  @cd src/tests && ./run.sh {{name}} {{environment}}
+  @echo "Running mobile tests..."
+  @src/tests/run-mobile.sh termux
 
 [no-cd]
 mobile platform="termux":
@@ -27,13 +12,8 @@ mobile platform="termux":
   @src/tests/run-mobile.sh {{platform}}
 
 [no-cd]
-mobile-clean:
+clean:
   @echo "Cleaning up mobile test containers and volumes..."
   @docker compose -f src/tests/docker-compose.mobile.yml -p k-mobile-test down -v 2>/dev/null || true
-
-[no-cd]
-clean:
-  @echo "Cleaning up test containers and images..."
-  @docker ps -a --filter "name=k-test-*" -q | xargs -r docker rm -f
-  @docker images -q "k-test-*" | xargs -r docker rmi -f
-  @just test mobile-clean
+  @docker ps -a --filter "name=k-test-*" -q | xargs -r docker rm -f 2>/dev/null || true
+  @docker images -q "k-test-*" | xargs -r docker rmi -f 2>/dev/null || true

@@ -15,7 +15,6 @@ set ignore-comments
 
 [no-cd]
 @pre-commit:
-  just bootstrap build
   pnpm exec lint-staged
 
 [no-cd]

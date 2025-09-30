@@ -1,525 +1,217 @@
-#!/bin/bash
+#!/bin/sh
 #
-# Generated bootstrap script
-# Do not edit directly - edit parts and rebuild
+# Config-driven bootstrap script for Termux environment
+# Reads configuration from ~/.config/kyldvs/k/configure.json
 #
 
-#--- util-functions ---#
+set -e
 
-_needs_util_functions() {
-    # Always needed as utility functions
-    true
+# POSIX compliant color definitions - always enable unless KD_NO_COLOR is set
+if [ -z "$KD_NO_COLOR" ]; then
+  KD_RED=$(printf '\033[31m')
+  KD_GREEN=$(printf '\033[32m')
+  KD_YELLOW=$(printf '\033[33m')
+  KD_BLUE=$(printf '\033[34m')
+  KD_CYAN=$(printf '\033[36m')
+  KD_GRAY=$(printf '\033[90m')
+  KD_WHITE=$(printf '\033[97m')
+  KD_RESET=$(printf '\033[0m')
+  KD_BOLD=$(printf '\033[1m')
+else
+  KD_RED=''
+  KD_GREEN=''
+  KD_YELLOW=''
+  KD_BLUE=''
+  KD_CYAN=''
+  KD_GRAY=''
+  KD_WHITE=''
+  KD_RESET=''
+  KD_BOLD=''
+fi
+
+# Indentation tracking
+KD_INDENT=0
+KD_CURRENT_STEP=""
+
+# Get current indentation string
+_kd_indent() {
+  i=0
+  while [ $i -lt $KD_INDENT ]; do
+    printf "  "
+    i=$((i + 1))
+  done
 }
 
-_util_functions() {
-    # POSIX compliant color definitions - always enable unless KD_NO_COLOR is set
-    if [ -z "$KD_NO_COLOR" ]; then
-        # Use printf to generate actual escape characters
-        KD_RED=$(printf '\033[31m')
-        KD_GREEN=$(printf '\033[32m')
-        KD_YELLOW=$(printf '\033[33m')
-        KD_BLUE=$(printf '\033[34m')
-        KD_CYAN=$(printf '\033[36m')
-        KD_GRAY=$(printf '\033[90m')
-        KD_WHITE=$(printf '\033[97m')
-        KD_RESET=$(printf '\033[0m')
-        KD_BOLD=$(printf '\033[1m')
-    else
-        KD_RED=''
-        KD_GREEN=''
-        KD_YELLOW=''
-        KD_BLUE=''
-        KD_CYAN=''
-        KD_GRAY=''
-        KD_WHITE=''
-        KD_RESET=''
-        KD_BOLD=''
-    fi
+# Log functions
+kd_log() {
+  local msg="$*"
+  printf "%s%s\n" "$(_kd_indent)" "$msg"
+}
 
-    # Indentation tracking
-    KD_INDENT=0
+kd_error() {
+  local msg="$*"
+  printf "%s[ERROR]%s %s\n" "$KD_RED" "$KD_RESET" "$msg" >&2
+}
 
-    # Get current indentation string
-    _kd_indent() {
-        i=0
-        while [ $i -lt $KD_INDENT ]; do
-            printf "  "
-            i=$((i + 1))
-        done
-    }
+# Step functions
+kd_step_start() {
+  local step_name="$1"
+  shift
+  local message="$*"
 
+  KD_CURRENT_STEP="$step_name"
 
-    # Log functions
-    kd_log() {
-        local msg="$*"
-        printf "%s%s\n" "$(_kd_indent)" "$msg"
-    }
+  printf "%s→%s %s%s%s" "$KD_CYAN" "$KD_RESET" "$KD_CYAN" "$step_name" \
+    "$KD_RESET"
+  if [ -n "$message" ]; then
+    printf ": %s" "$message"
+  fi
+  printf "\n"
 
-    kd_info() {
-        local msg="$*"
-        printf "%s[INFO]%s %s\n" "$KD_BLUE" "$KD_RESET" "$msg"
-    }
+  KD_INDENT=$((KD_INDENT + 1))
+}
 
-    kd_warn() {
-        local msg="$*"
-        printf "%s[WARN]%s %s\n" "$KD_YELLOW" "$KD_RESET" "$msg"
-    }
+kd_step_end() {
+  if [ $KD_INDENT -gt 0 ]; then
+    KD_INDENT=$((KD_INDENT - 1))
+  fi
 
-    kd_error() {
-        local msg="$*"
-        printf "%s[ERROR]%s %s\n" "$KD_RED" "$KD_RESET" "$msg" >&2
-    }
-
-    # Platform detection functions
-    kd_is_termux() {
-        # Multiple checks for robust Termux detection
-        [ -d "/data/data/com.termux" ] || \
-        [ -n "${PREFIX:-}" ] && [ "$PREFIX" = "/data/data/com.termux/files/usr" ] || \
-        [ -f "/system/bin/app_process" ]
-    }
-
-    kd_is_ubuntu() {
-        [ -f /etc/os-release ] && grep -q "Ubuntu" /etc/os-release
-    }
-
-
-    kd_get_platform() {
-        if kd_is_termux; then
-            echo "termux"
-        elif kd_is_ubuntu; then
-            echo "ubuntu"
-        else
-            echo "unknown"
-        fi
-    }
-
-    # Cross-environment pattern functions
-    _for_termux() {
-        if kd_is_termux; then
-            "$@"
-        fi
-    }
-
-    _for_ubuntu() {
-        if kd_is_ubuntu; then
-            "$@"
-        fi
-    }
-
-    # Platform dispatch helper - convention over configuration
-    # Usage: kd_platform_dispatch "function_name"
-    # Calls _function_name_<platform> based on current platform
-    # Returns 1 if platform not supported, 0 otherwise
-    kd_platform_dispatch() {
-        local base_name="$1"
-        local platform
-        platform=$(kd_get_platform)
-
-        local func_name="_${base_name}_${platform}"
-
-        # Check if platform-specific function exists
-        if command -v "$func_name" >/dev/null 2>&1; then
-            "$func_name"
-            return 0
-        else
-            kd_step_skip "platform $platform not supported"
-            return 1
-        fi
-    }
-
-
-    # Step functions
+  if [ -n "$KD_CURRENT_STEP" ]; then
+    printf "%s✓%s %sdone%s\n" "$KD_GREEN" "$KD_RESET" "$KD_GREEN" \
+      "$KD_RESET"
     KD_CURRENT_STEP=""
-
-    kd_step_start() {
-        local step_name="$1"
-        shift
-        local message="$*"
-
-        KD_CURRENT_STEP="$step_name"
-
-        printf "%s→%s %s%s%s" "$KD_CYAN" "$KD_RESET" "$KD_CYAN" "$step_name" "$KD_RESET"
-        if [ -n "$message" ]; then
-            printf ": %s" "$message"
-        fi
-        printf "\n"
-
-        KD_INDENT=$((KD_INDENT + 1))
-    }
-
-    kd_step_end() {
-        if [ $KD_INDENT -gt 0 ]; then
-            KD_INDENT=$((KD_INDENT - 1))
-        fi
-
-        if [ -n "$KD_CURRENT_STEP" ]; then
-            printf "%s✓%s %sdone%s\n" "$KD_GREEN" "$KD_RESET" "$KD_GREEN" "$KD_RESET"
-            KD_CURRENT_STEP=""
-        fi
-    }
-
-    kd_step_skip() {
-        local reason="$*"
-
-        if [ $KD_INDENT -gt 0 ]; then
-            KD_INDENT=$((KD_INDENT - 1))
-        fi
-
-        printf "  %s○%s %sskipping%s" "$KD_GRAY" "$KD_RESET" "$KD_GRAY" "$KD_RESET"
-        if [ -n "$reason" ]; then
-            printf " %s(%s%s%s)%s" "$KD_GRAY" "$KD_RESET" "$reason" "$KD_GRAY" "$KD_RESET"
-        fi
-        printf "\n"
-        KD_CURRENT_STEP=""
-    }
+  fi
 }
 
-_util_functions
+kd_step_skip() {
+  local reason="$*"
 
-#--- /util-functions ---#
+  if [ $KD_INDENT -gt 0 ]; then
+    KD_INDENT=$((KD_INDENT - 1))
+  fi
 
-
-#--- init-k ---#
-
-#!/bin/bash
-
-_needs_init_k() {
-    # Check if init.sh has the expected content
-    ! grep -q 'for f in ~/.config/k/\*.sh' ~/.config/k/init.sh 2>/dev/null
+  printf "  %s○%s %sskipping%s" "$KD_GRAY" "$KD_RESET" "$KD_GRAY" \
+    "$KD_RESET"
+  if [ -n "$reason" ]; then
+    printf " %s(%s%s%s)%s" "$KD_GRAY" "$KD_RESET" "$reason" "$KD_GRAY" \
+      "$KD_RESET"
+  fi
+  printf "\n"
+  KD_CURRENT_STEP=""
 }
 
-_init_k() {
-    kd_step_start "init-k" "Setting up ~/.config/k directory structure"
+# Configuration
+CONFIG_FILE="$HOME/.config/kyldvs/k/configure.json"
 
-    if ! _needs_init_k; then
-        kd_step_skip "~/.config/k directory already exists"
-        return 0
-    fi
+# Check if config exists
+check_config() {
+  kd_step_start "config" "Loading configuration"
 
-    kd_log "Creating ~/.config/k directory"
-    mkdir -p ~/.config/k
+  if [ ! -f "$CONFIG_FILE" ]; then
+    kd_error "Configuration file not found: $CONFIG_FILE"
+    kd_error "Please run bootstrap/configure.sh first"
+    exit 1
+  fi
 
-    kd_log "Creating ~/.config/k/init.sh loader script"
-    cat > ~/.config/k/init.sh << 'EOF'
-# ~/.config/k/init.sh - Loader for all shell customizations
-# Sources all .sh files in ~/.config/k/ except init.sh itself
+  if ! command -v jq >/dev/null 2>&1; then
+    kd_log "jq not installed, will install shortly"
+  fi
 
-for f in ~/.config/k/*.sh; do
-    [ -f "$f" ] && [ "$f" != ~/.config/k/init.sh ] && . "$f"
-done
-EOF
-
-    kd_step_end
+  kd_step_end
 }
 
-_init_k
+# Install Termux packages
+install_packages() {
+  kd_step_start "packages" "Installing essential packages"
 
-#--- /init-k ---#
+  # Check which packages are already installed
+  local packages_needed=""
 
+  if ! command -v ssh >/dev/null 2>&1; then
+    packages_needed="$packages_needed openssh"
+  fi
 
-#--- fake-sudo ---#
+  if ! command -v mosh >/dev/null 2>&1; then
+    packages_needed="$packages_needed mosh"
+  fi
 
-_needs_fake_sudo() {
-    # Check if bin/sudo already exists
-    [ ! -f "$HOME/bin/sudo" ]
-}
+  if ! command -v jq >/dev/null 2>&1; then
+    packages_needed="$packages_needed jq"
+  fi
 
-_fake_sudo() {
-    # Create fake sudo command for Termux in home/bin
-    kd_step_start "fake-sudo" "Setting up for Termux"
-
-    if ! _needs_fake_sudo; then
-        kd_step_skip "~/bin/sudo already exists"
-        return 0
-    fi
-
-    # Create bin directory if it doesn't exist
-    kd_log "Creating ~/bin directory"
-    mkdir -p "$HOME/bin"
-
-    # Create fake-sudo directory and script
-    kd_log "Creating fake-sudo script"
-    mkdir -p "$HOME/fake-sudo"
-    cat > "$HOME/fake-sudo/sudo" << 'EOF'
-#!/bin/bash
-# Fake sudo for Termux - just execute the command directly
-exec "$@"
-EOF
-
-    # Make it executable
-    chmod +x "$HOME/fake-sudo/sudo"
-
-    # Create symlink in bin
-    ln -sf "$HOME/fake-sudo/sudo" "$HOME/bin/sudo"
-
-    kd_step_end
-}
-
-_fake_sudo
-
-#--- /fake-sudo ---#
-
-
-#--- init-profile ---#
-
-_needs_profile_init() {
-    ! grep -q '. ~/.config/k/init.sh' ~/.profile 2>/dev/null
-}
-
-_init_profile() {
-    kd_step_start "init-profile" "Setting up .profile"
-
-    if ! _needs_profile_init; then
-        kd_step_skip "~/.config/k/init.sh already sourced in profile"
-        return 0
-    fi
-
-    # Create .profile if it doesn't exist
-    [ ! -f ~/.profile ] && echo "# POSIX compliant profile with common setup" > ~/.profile
-
-    kd_log "Adding ~/.config/k/init.sh source line to ~/.profile"
-    echo "" >> ~/.profile
-    echo "# Source shell customizations from ~/.config/k/" >> ~/.profile
-    echo ". ~/.config/k/init.sh" >> ~/.profile
-
-    kd_step_end
-}
-
-_init_profile
-
-#--- /init-profile ---#
-
-
-#--- nerdfetch ---#
-
-_needs_nerdfetch() {
-    ! command -v nerdfetch >/dev/null 2>&1
-}
-
-_nerdfetch_termux() {
-    kd_log "Installing nerdfetch for Termux"
-    curl -fsSL https://raw.githubusercontent.com/ThatOneCalculator/NerdFetch/main/nerdfetch -o /data/data/com.termux/files/usr/bin/nerdfetch
-    chmod a+x /data/data/com.termux/files/usr/bin/nerdfetch
-}
-
-_nerdfetch_ubuntu() {
+  if [ -z "$packages_needed" ]; then
+    kd_step_skip "all packages already installed"
     return 0
+  fi
+
+  kd_log "Installing:$packages_needed"
+  pkg install -y $packages_needed
+
+  kd_step_end
 }
 
+# Install proot-distro for Doppler CLI
+install_proot_distro() {
+  kd_step_start "proot-distro" "Setting up proot-distro"
 
-_nerdfetch() {
-    kd_step_start "nerdfetch" "Installing nerdfetch"
-
-    if ! _needs_nerdfetch; then
-        kd_step_skip "nerdfetch already installed"
-        return 0
-    fi
-
-    kd_platform_dispatch "nerdfetch"
-
-    kd_step_end
-}
-
-_nerdfetch
-
-#--- /nerdfetch ---#
-
-
-#--- mosh ---#
-
-_needs_mosh() {
-    ! command -v mosh >/dev/null 2>&1
-}
-
-_mosh_termux() {
-    kd_log "Installing mosh for Termux"
-    pkg install -y mosh
-}
-
-_mosh_ubuntu() {
-    kd_log "Installing mosh for Ubuntu"
-    if command -v sudo >/dev/null 2>&1; then
-        sudo apt-get update && sudo apt-get install -y mosh
-    else
-        apt-get update && apt-get install -y mosh
-    fi
-}
-
-
-_mosh() {
-    kd_step_start "mosh" "Installing mosh"
-
-    if ! _needs_mosh; then
-        kd_step_skip "mosh already installed"
-        return 0
-    fi
-
-    kd_platform_dispatch "mosh"
-
-    kd_step_end
-}
-
-_mosh
-
-#--- /mosh ---#
-
-
-#--- ssh-utils ---#
-
-#!/bin/bash
-
-_needs_ssh_utils() {
-    # Check if ssh-utils.sh has the ssha function
-    ! grep -q 'ssha()' ~/.config/k/ssh-utils.sh 2>/dev/null
-}
-
-_ssh_utils() {
-    kd_step_start "ssh-utils" "Add SSH agent wrapper functions"
-
-    if ! _needs_ssh_utils; then
-        kd_step_skip "SSH utilities already configured"
-        return
-    fi
-
-    kd_log "Creating ~/.config/k/ssh-utils.sh"
-
-    cat > ~/.config/k/ssh-utils.sh << 'EOF'
-# SSH agent wrapper functions
-ssha() {
-    # Check if agent running
-    if [ -z "$SSH_AUTH_SOCK" ]; then
-        eval $(ssh-agent -s)
-    fi
-    # Check if keys loaded
-    if ! ssh-add -l &>/dev/null; then
-        ssh-add
-    fi
-    ssh "$@"
-}
-
-mosha() {
-    # Same agent setup as ssha
-    if [ -z "$SSH_AUTH_SOCK" ]; then
-        eval $(ssh-agent -s)
-    fi
-    if ! ssh-add -l &>/dev/null; then
-        ssh-add
-    fi
-    mosh "$@"
-}
-EOF
-
-    kd_step_end
-}
-
-_ssh_utils
-
-#--- /ssh-utils ---#
-
-
-#--- proot-distro ---#
-
-_needs_proot_distro() {
-    ! command -v proot-distro >/dev/null 2>&1
-}
-
-_proot_distro_termux() {
+  if ! command -v proot-distro >/dev/null 2>&1; then
     kd_log "Installing proot-distro"
     pkg install -y proot-distro
+  else
+    kd_log "proot-distro already installed"
+  fi
+
+  kd_step_end
 }
 
-_proot_distro() {
-    kd_step_start "proot-distro" "Installing proot-distro"
+# Install Alpine Linux via proot-distro
+install_alpine() {
+  kd_step_start "alpine" "Installing Alpine Linux"
 
-    if ! _needs_proot_distro; then
-        kd_step_skip "proot-distro already installed"
-        return 0
-    fi
+  if [ -d "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/alpine" ]; then
+    kd_step_skip "Alpine already installed"
+    return 0
+  fi
 
-    kd_platform_dispatch "proot-distro"
+  kd_log "Installing Alpine Linux (this may take a few minutes)"
+  proot-distro install alpine
 
-    kd_step_end
+  kd_step_end
 }
 
-_proot_distro
+# Install Doppler CLI in Alpine
+install_doppler_alpine() {
+  kd_step_start "doppler-cli" "Installing Doppler CLI in Alpine"
 
-#--- /proot-distro ---#
+  if proot-distro login alpine -- command -v doppler >/dev/null 2>&1; then
+    kd_step_skip "Doppler already installed in Alpine"
+    return 0
+  fi
 
+  kd_log "Installing Doppler CLI"
+  proot-distro login alpine -- sh -c '
+    wget -q -t3 "https://packages.doppler.com/public/cli/rsa.8004D9FF50437357.key" -O /etc/apk/keys/cli@doppler-8004D9FF50437357.rsa.pub
+    echo "https://packages.doppler.com/public/cli/alpine/any-version/main" | tee -a /etc/apk/repositories
+    apk add doppler
+  '
 
-#--- proot-distro-alpine ---#
-
-_needs_proot_distro_alpine() {
-    [ ! -d "/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/alpine" ]
+  kd_step_end
 }
 
-_proot_distro_alpine_termux() {
-    kd_log "Installing Alpine Linux via proot-distro"
-    proot-distro install alpine
-}
+# Create Doppler wrapper script
+create_doppler_wrapper() {
+  kd_step_start "doppler-wrapper" "Creating Doppler wrapper"
 
-_proot_distro_alpine() {
-    kd_step_start "proot-distro-alpine" "Installing Alpine distro"
+  if [ -f "$HOME/bin/doppler" ]; then
+    kd_step_skip "wrapper already exists"
+    return 0
+  fi
 
-    if ! _needs_proot_distro_alpine; then
-        kd_step_skip "Alpine already installed"
-        return 0
-    fi
+  kd_log "Creating ~/bin directory"
+  mkdir -p "$HOME/bin"
 
-    kd_platform_dispatch "proot-distro-alpine"
-
-    kd_step_end
-}
-
-_proot_distro_alpine
-
-#--- /proot-distro-alpine ---#
-
-
-#--- proot-distro-doppler ---#
-
-_needs_proot_distro_doppler() {
-    ! proot-distro login alpine -- command -v doppler >/dev/null 2>&1
-}
-
-_proot_distro_doppler_termux() {
-    kd_log "Installing Doppler CLI in Alpine"
-    proot-distro login alpine -- sh -c '
-        wget -q -t3 "https://packages.doppler.com/public/cli/rsa.8004D9FF50437357.key" -O /etc/apk/keys/cli@doppler-8004D9FF50437357.rsa.pub
-        echo "https://packages.doppler.com/public/cli/alpine/any-version/main" | tee -a /etc/apk/repositories
-        apk add doppler
-    '
-}
-
-_proot_distro_doppler() {
-    kd_step_start "proot-distro-doppler" "Installing doppler in Alpine"
-
-    if ! _needs_proot_distro_doppler; then
-        kd_step_skip "doppler already installed in Alpine"
-        return 0
-    fi
-
-    kd_platform_dispatch "proot-distro-doppler"
-
-    kd_step_end
-}
-
-_proot_distro_doppler
-
-#--- /proot-distro-doppler ---#
-
-
-#--- doppler ---#
-
-_needs_doppler() {
-    [ ! -f "$HOME/bin/doppler" ]
-}
-
-_doppler_termux() {
-    kd_log "Creating ~/bin directory"
-    mkdir -p "$HOME/bin"
-
-    kd_log "Creating doppler wrapper script"
-    cat > "$HOME/bin/doppler" << 'EOF'
+  kd_log "Creating wrapper script"
+  cat > "$HOME/bin/doppler" << 'EOF'
 #!/data/data/com.termux/files/usr/bin/sh
 # Run Doppler inside Alpine proot, in the current directory, forwarding args
 set -e
@@ -529,51 +221,159 @@ proot-distro login alpine -- sh -lc '
 ' doppler "$@"
 EOF
 
-    chmod +x "$HOME/bin/doppler"
+  chmod +x "$HOME/bin/doppler"
+
+  kd_step_end
 }
 
-_doppler() {
-    kd_step_start "doppler" "Setting up doppler wrapper"
+# Check Doppler authentication
+check_doppler_auth() {
+  kd_step_start "doppler-auth" "Checking Doppler authentication"
 
-    if ! _needs_doppler; then
-        kd_step_skip "~/bin/doppler already exists"
-        return 0
-    fi
+  if ! "$HOME/bin/doppler" configure get token --plain --silent >/dev/null 2>&1
+  then
+    kd_log ""
+    kd_error "Doppler is not authenticated"
+    kd_error ""
+    kd_error "Please run the following command to authenticate:"
+    kd_error "  ~/bin/doppler login"
+    kd_error ""
+    kd_error "Then re-run this script"
+    exit 1
+  fi
 
-    kd_platform_dispatch "doppler"
-
-    kd_step_end
+  kd_log "Authenticated"
+  kd_step_end
 }
 
-_doppler
+# Retrieve SSH keys from Doppler
+retrieve_ssh_keys() {
+  kd_step_start "ssh-keys" "Retrieving SSH keys from Doppler"
 
-#--- /doppler ---#
+  # Parse config
+  doppler_project=$(jq -r '.doppler.project' "$CONFIG_FILE")
+  doppler_env=$(jq -r '.doppler.env' "$CONFIG_FILE")
+  ssh_key_public=$(jq -r '.doppler.ssh_key_public' "$CONFIG_FILE")
+  ssh_key_private=$(jq -r '.doppler.ssh_key_private' "$CONFIG_FILE")
 
+  # Create .ssh directory
+  if [ ! -d "$HOME/.ssh" ]; then
+    kd_log "Creating ~/.ssh directory"
+    mkdir -p "$HOME/.ssh"
+    chmod 700 "$HOME/.ssh"
+  fi
 
-#--- termux-next-steps ---#
+  # Check if keys already exist
+  if [ -f "$HOME/.ssh/gh_vm" ] && [ -f "$HOME/.ssh/gh_vm.pub" ]; then
+    kd_step_skip "SSH keys already exist"
+    return 0
+  fi
 
-_needs_termux_next_steps() {
-    # Always run to show next steps
-    true
+  kd_log "Fetching keys from Doppler ($doppler_project/$doppler_env)"
+
+  # Fetch private key
+  kd_log "Fetching private key: $ssh_key_private"
+  "$HOME/bin/doppler" secrets get "$ssh_key_private" --plain \
+    --project "$doppler_project" --config "$doppler_env" \
+    > "$HOME/.ssh/gh_vm"
+  chmod 600 "$HOME/.ssh/gh_vm"
+
+  # Fetch public key
+  kd_log "Fetching public key: $ssh_key_public"
+  "$HOME/bin/doppler" secrets get "$ssh_key_public" --plain \
+    --project "$doppler_project" --config "$doppler_env" \
+    > "$HOME/.ssh/gh_vm.pub"
+  chmod 644 "$HOME/.ssh/gh_vm.pub"
+
+  kd_step_end
 }
 
-_termux_next_steps() {
-    platform=$(kd_get_platform)
-    case "$platform" in
-        termux)
-            printf "\n"
-            printf "%s%s%s Next Steps:%s\n" "$KD_BOLD" "$KD_YELLOW" "🚀" "$KD_RESET"
-            printf "   Run %sdoppler login%s to authenticate with Doppler\n" "$KD_CYAN" "$KD_RESET"
-            printf "   Then continue with your bootstrap process\n"
-            ;;
-        ubuntu|*)
-            # Do nothing for other platforms
-            return 0
-            ;;
-    esac
+# Generate SSH config
+generate_ssh_config() {
+  kd_step_start "ssh-config" "Generating SSH configuration"
+
+  vm_hostname=$(jq -r '.vm.hostname' "$CONFIG_FILE")
+  vm_port=$(jq -r '.vm.port' "$CONFIG_FILE")
+  vm_username=$(jq -r '.vm.username' "$CONFIG_FILE")
+
+  # Check if config already has vm entry
+  if [ -f "$HOME/.ssh/config" ] && grep -q "^Host vm$" "$HOME/.ssh/config"
+  then
+    kd_step_skip "SSH config already has vm entry"
+    return 0
+  fi
+
+  kd_log "Adding VM entry to ~/.ssh/config"
+
+  # Create config if it doesn't exist
+  touch "$HOME/.ssh/config"
+  chmod 600 "$HOME/.ssh/config"
+
+  # Append VM config
+  cat >> "$HOME/.ssh/config" <<EOF
+
+# k bootstrap - VM connection
+Host vm
+  HostName $vm_hostname
+  Port $vm_port
+  User $vm_username
+  IdentityFile ~/.ssh/gh_vm
+  ServerAliveInterval 60
+  ServerAliveCountMax 3
+EOF
+
+  kd_step_end
 }
 
-_termux_next_steps
+# Test SSH connection
+test_ssh_connection() {
+  kd_step_start "ssh-test" "Testing SSH connection to VM"
 
-#--- /termux-next-steps ---#
+  kd_log "Attempting connection to vm..."
+  if ssh -q -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking=no \
+    vm exit 2>/dev/null; then
+    kd_log "Connection successful!"
+  else
+    kd_log "Connection test failed (this is expected on first run)"
+    kd_log "You may need to manually accept the host key on first connect"
+  fi
 
+  kd_step_end
+}
+
+# Display success message
+show_next_steps() {
+  printf "\n"
+  printf "%s%s✓ Bootstrap Complete!%s\n" "$KD_BOLD" "$KD_GREEN" "$KD_RESET"
+  printf "\n"
+  printf "%s%sNext Steps:%s\n" "$KD_BOLD" "$KD_YELLOW" "$KD_RESET"
+  printf "  Connect to your VM using:\n"
+  printf "    %sssh vm%s        - Standard SSH connection\n" "$KD_CYAN" \
+    "$KD_RESET"
+  printf "    %smosh vm%s       - Mosh connection (roaming)\n" "$KD_CYAN" \
+    "$KD_RESET"
+  printf "\n"
+  printf "  Or use agent-wrapped versions:\n"
+  printf "    %sssha vm%s       - SSH with automatic agent setup\n" \
+    "$KD_CYAN" "$KD_RESET"
+  printf "    %smosha vm%s      - Mosh with automatic agent setup\n" \
+    "$KD_CYAN" "$KD_RESET"
+  printf "\n"
+}
+
+# Main execution
+main() {
+  check_config
+  install_packages
+  install_proot_distro
+  install_alpine
+  install_doppler_alpine
+  create_doppler_wrapper
+  check_doppler_auth
+  retrieve_ssh_keys
+  generate_ssh_config
+  test_ssh_connection
+  show_next_steps
+}
+
+main

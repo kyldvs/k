@@ -33,8 +33,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Quick Reference
 
 ```bash
-just bootstrap build      # Compile parts into bootstrap scripts
-just test all            # Test all configs
+just test all            # Run mobile tests
 just vcs cm "msg"        # Commit with message
 just vcs push            # Push to remote
 ```
@@ -43,11 +42,8 @@ just vcs push            # Push to remote
 
 ```
 .
-├── bootstrap/           # Generated scripts (DO NOT EDIT)
-├── src/
-│   ├── bootstrap/      # JSON configs defining which parts
-│   ├── parts/         # Reusable shell functions
-│   └── tests/         # Docker-based test infrastructure
+├── bootstrap/           # Config-driven bootstrap scripts
+├── src/tests/          # Docker-based mobile test infrastructure
 ├── tasks/             # Justfile modules
 └── justfile           # Main entry point
 ```
@@ -96,47 +92,44 @@ script-recipe:        # Verbose bash script
 
 ## Bootstrap System
 
-Modular compilation: `src/parts/*.sh` → `just bootstrap build` → `bootstrap/*.sh`
+Config-driven bootstrap for mobile development environments.
 
-### Part Structure
-```bash
-# src/parts/example.sh
-_needs_example() { [ ! -f ~/.done ]; }  # Idempotency
-_example_termux() { pkg install -y example; }  # Platform-specific
-_example() {
-    kd_step_start "example" "Installing"
-    ! _needs_example && { kd_step_skip "done"; return 0; }
-    kd_platform_dispatch "example"
-    kd_step_end
-}
-_example  # Self-execute
-```
+### Scripts
+- `bootstrap/configure.sh` - Interactive setup, creates `~/.config/kyldvs/k/configure.json`
+- `bootstrap/termux.sh` - Minimal Termux environment with SSH/Mosh to VM
+- `bootstrap/vm.sh` - Future VM provisioning (stub)
 
 ### Key Functions
 - `kd_step_start/end/skip` - Step logging
-- `kd_log/info/warn/error` - Output helpers
-- `kd_platform_dispatch "name"` - Calls `_name_<platform>` automatically
-- `kd_get_platform` - Returns: termux, ubuntu, unknown
+- `kd_log/error` - Output helpers
 
-### Commands
+### Usage
 ```bash
-just bootstrap build          # Compile all
-just bootstrap build-one vm   # Single config
-just test all                # Full suite
+# One-time configuration
+curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/configure.sh | sh
+
+# Bootstrap Termux environment
+curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/termux.sh | sh
 ```
 
 ## Testing
 
-Docker-based tests validate correctness and idempotency using `src/tests/lib/assertions.sh`.
+Docker Compose-based mobile tests validate bootstrap scripts with mocked dependencies.
 
 ```bash
-# src/tests/tests/example.test.sh
+# Run tests
+just test all            # Run mobile termux tests
+just test mobile termux  # Explicit mobile test
+just test clean          # Cleanup containers/images
+
+# Test structure
+# src/tests/tests/mobile-termux.test.sh
 #!/usr/bin/env bash
 set -euo pipefail
 . /lib/assertions.sh
-curl -fsSL http://k.local/example.sh | bash  # Run
-assert_file "/path/to/file"                  # Verify
-curl -fsSL http://k.local/example.sh | bash  # Idempotency
+cat /var/www/bootstrap/termux.sh | bash  # Run via direct mount
+assert_file "$HOME/.ssh/gh_vm"           # Verify
+cat /var/www/bootstrap/termux.sh | bash  # Idempotency
 ```
 
 ## Development Practices
@@ -149,14 +142,11 @@ curl -fsSL http://k.local/example.sh | bash  # Idempotency
 
 ### Debugging
 ```bash
-# Enable debug output
-export KD_DEBUG=1
-
 # Disable colors for logs
 export KD_NO_COLOR=1
 
-# Test single component
-just test config termux
+# Run mobile tests
+just test mobile termux
 ```
 
 ### Performance
@@ -206,19 +196,13 @@ just test config termux
 
 ## Workflows
 
-### Add Feature
-1. Create `src/parts/feature.sh` with structure template
-2. Add to `src/bootstrap/*.json`
-3. `just bootstrap build && just test all`
-4. `just vcs cm "feat: description" && just vcs push`
-
-### Add Platform
-1. Add `kd_is_<platform>()` to util-functions.sh
-2. Update `kd_get_platform()` return value
-3. Add `_<part>_<platform>()` implementations
-4. Platform dispatch auto-routes to new functions
-
-### Fix/Refactor
-1. Edit `src/parts/*.sh`
-2. `just bootstrap build && just test all`
+### Modify Bootstrap Scripts
+1. Edit `bootstrap/termux.sh` or `bootstrap/configure.sh`
+2. `just test all`
 3. `just vcs cm "fix|refactor: description" && just vcs push`
+
+### Add Mobile Test Assertions
+1. Update `src/tests/tests/mobile-termux.test.sh`
+2. Add new assertions using `src/tests/lib/assertions.sh`
+3. `just test mobile termux`
+4. `just vcs cm "test: description" && just vcs push`
