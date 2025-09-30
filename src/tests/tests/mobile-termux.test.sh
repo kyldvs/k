@@ -30,9 +30,9 @@ echo "  ✓ Test configuration created"
 # Verify doppler mock works
 assert_command "doppler configure get token --plain --silent" "mock-doppler-token-12345"
 
-# Test Phase 1: Run bootstrap script
+# Test Phase 1: Run bootstrap script (pipe to bash like curl pattern)
 echo "→ Running bootstrap script (first run)"
-bootstrap_output=$(curl -fsSL http://k.local/termux.sh 2>&1) || {
+bootstrap_output=$(cat /var/www/bootstrap/termux.sh | bash 2>&1) || {
     echo "✗ FAIL: Bootstrap script failed"
     echo "$bootstrap_output"
     exit 1
@@ -42,9 +42,15 @@ echo "  ✓ Bootstrap completed"
 # Test Phase 2: Validate installations
 echo "→ Validating package installations"
 
-# Note: Old bootstrap installs different packages, adjust expectations
-# Check for basic packages that should be installed
-assert_command_exists "jq" || echo "  ○ jq not required in old bootstrap"
+# Note: Old bootstrap installs mosh, proot-distro, doppler
+# jq is NOT installed by old bootstrap
+if command -v mosh >/dev/null 2>&1; then
+    echo "  ✓ mosh installed"
+fi
+
+if command -v proot-distro >/dev/null 2>&1; then
+    echo "  ✓ proot-distro installed"
+fi
 
 # Test Phase 3: Validate fake-sudo (from old bootstrap)
 echo "→ Validating fake-sudo setup"
@@ -63,7 +69,7 @@ fi
 
 # Test Phase 5: Idempotency test
 echo "→ Testing idempotency (running script again)"
-idempotent_output=$(curl -fsSL http://k.local/termux.sh 2>&1) || {
+idempotent_output=$(cat /var/www/bootstrap/termux.sh | bash 2>&1) || {
     echo "✗ FAIL: Second bootstrap run failed"
     echo "$idempotent_output"
     exit 1

@@ -24,12 +24,12 @@ config name environment="termux":
 [no-cd]
 mobile platform="termux":
   @echo "Testing mobile bootstrap on {{platform}}..."
-  @cd src/tests && ./run-mobile.sh {{platform}}
+  @src/tests/run-mobile.sh {{platform}}
 
 [no-cd]
 mobile-clean:
   @echo "Cleaning up mobile test containers and volumes..."
-  @docker-compose -f src/tests/docker-compose.mobile.yml -p k-mobile-test down -v 2>/dev/null || true
+  @docker compose -f src/tests/docker-compose.mobile.yml -p k-mobile-test down -v 2>/dev/null || true
 
 [no-cd]
 clean:
