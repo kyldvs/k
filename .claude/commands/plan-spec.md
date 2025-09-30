@@ -1,6 +1,5 @@
 ---
 description: Create project specification from brief description
-argument-hint: [project-name or brief description]
 ---
 
 You will create a detailed project specification from the following input: $ARGUMENTS

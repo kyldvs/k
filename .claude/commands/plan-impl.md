@@ -1,6 +1,5 @@
 ---
 description: Create implementation plan from specification
-argument-hint: [project-name]
 ---
 
 # Determine Project

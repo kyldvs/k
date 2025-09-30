@@ -1,6 +1,5 @@
 ---
 description: Autonomously implement tasks from implementation plan
-argument-hint: [project-name]
 ---
 
 # Determine Project
