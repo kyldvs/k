@@ -1,3 +1,8 @@
+---
+description: Update CLAUDE.md with conversation insights
+argument-hint: [optional: specific instructions]
+---
+
 You are updating CLAUDE.md with important instructions from the current conversation context.
 
 ## What to add to CLAUDE.md

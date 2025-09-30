@@ -1,6 +1,8 @@
-# `k` - kyldvs dotfiles
+# CLAUDE.md
 
-Project uses Claude Code with specialized agents and workflows (`.claude/`).
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+# `k` - kyldvs dotfiles
 
 ## Core Principles
 
@@ -37,32 +39,6 @@ just vcs acp "msg"        # Add, commit, push (ALWAYS use this)
 # Development cycle
 just bootstrap build && just test all && just vcs acp "feat: xyz"
 ```
-
-## Claude Code Workflows
-
-Specialized agents, commands, and output styles in `.claude/` directory.
-
-### Available Agents
-- **code-finder** / **code-finder-advanced** - Locate code patterns
-- **implementor** - Precise implementation tasks
-- **root-cause-analyzer** - Systematic bug diagnosis
-- **backend-developer** / **frontend-ui-developer** - Domain-specific dev
-- **library-docs-writer** - Documentation generation
-
-### Available Commands
-- `/better-init` - Create/improve CLAUDE.md
-- `/orchestrate` - Multi-agent orchestration mode
-- `/git` - Documentation & commit workflows
-- `/fix-build` - Systematic build error fixing
-- `/research/deep` - Asymmetric research methodology
-- `/execute/implement-plan` - Structured plan implementation
-
-### Output Styles
-- **main** - Senior developer approach with agent delegation
-- **planning** - Strategic planning methodology
-- **deep-research** - Evidence-based research mode
-
-See `.claude/README.md` for details.
 
 ## Architecture Overview
 
@@ -245,60 +221,20 @@ _example() {
 
 ## Testing Infrastructure
 
-### Docker-Based Testing
-- Isolated environments per config
-- Idempotency verification
-- Network server for bootstrap delivery
+Docker-based isolated environments test each config for correctness and idempotency. Tests use shared assertion helpers in `src/tests/lib/assertions.sh`.
 
-### Test Structure
-```
-src/tests/
-├── run.sh              # Test orchestrator
-├── lib/               # Shared test utilities
-│   └── assertions.sh  # Common assertion helpers
-├── images/            # Docker environments
-├── tests/             # Test scripts
-└── fixtures/          # Test assets
-```
-
-### Writing Tests
 ```bash
 # src/tests/tests/example.test.sh
 #!/usr/bin/env bash
 set -euo pipefail
-
-# Source shared assertion helpers
 . /lib/assertions.sh
 
-echo "→ Testing example bootstrap script"
-
-# Test 1: Run bootstrap
-curl -fsSL http://k.local/example.sh | bash
-
-# Test 2: Verify installation
-assert_file "/path/to/installed/file"
-assert_command "example --version" "1.0.0"
-assert_file_contains "$HOME/.config" "example"
-
-# Test 3: Idempotency
-curl -fsSL http://k.local/example.sh | bash
+curl -fsSL http://k.local/example.sh | bash  # Run bootstrap
+assert_file "/path/to/installed/file"        # Verify installation
+curl -fsSL http://k.local/example.sh | bash  # Test idempotency
 ```
 
-### Test Assertion Helpers
-```bash
-assert_file "/path/to/file"              # File exists
-assert_symlink "link" "target"           # Symlink correct
-assert_command "cmd" "expected output"   # Command output matches
-assert_file_contains "file" "pattern"    # File contains pattern
-assert_command_exists "command"          # Command in PATH
-```
-
-### Platform-Specific Issues
-
-#### Termux
-- DNS resolution requires ulimit fix
-- User switching: root for DNS, system for pkg
-- Custom build script in `src/tests/images/termux/build.sh`
+**Termux quirks:** DNS requires ulimit fix; user switching between root (DNS) and system (pkg).
 
 ## Development Practices
 
@@ -392,11 +328,3 @@ just test config termux
 2. Run full test suite
 3. Verify idempotency
 4. Commit: `just vcs acp "refactor: description"`
-
-## Important Reminders
-
-- **Simplicity > Cleverness** - maintainable code wins
-- **Test everything** - especially idempotency
-- **Document intent** - why, not what
-- **Fail gracefully** - helpful error messages
-- **Stay consistent** - follow established patterns
