@@ -39,9 +39,10 @@ This implementation replaces the existing part-based compilation system with a c
 - [ ] Task 1.2: Create interactive configure script
   - Files: `bootstrap/configure.sh`
   - Dependencies: None
-  - Details: Prompts for all config values, writes JSON, sets permissions (600)
+  - Details: Prompts for config values (VM, Doppler project/env, SSH key names), writes JSON, sets permissions (600)
   - Implementation: POSIX shell, use printf for prompts, validate inputs
   - Pattern: Follow `util-functions.sh` style for consistency
+  - Note: Does NOT prompt for Doppler token - handled via `doppler login`
 
 - [ ] Task 1.3: Add JSON schema validation helper
   - Files: `bootstrap/configure.sh` (embedded function)
@@ -70,12 +71,13 @@ This implementation replaces the existing part-based compilation system with a c
   - Implementation: Use Doppler's official install script or direct download
   - Pattern: Follow existing `doppler.sh` patterns but inline
 
-- [ ] Task 2.4: Implement Doppler authentication
+- [ ] Task 2.4: Implement Doppler authentication check
   - Files: `bootstrap/termux.sh`
   - Dependencies: Task 2.3
-  - Details: Use token from config to authenticate Doppler CLI
-  - Implementation: `doppler configure set token <token>`
-  - Pattern: Check if already authenticated before re-auth
+  - Details: Check if Doppler is authenticated, prompt user if not
+  - Implementation: `doppler configure get token --plain --silent` to check auth
+  - Pattern: If not authenticated, display clear message to run `doppler login` and exit
+  - Message: "Please run 'doppler login' to authenticate, then re-run this script"
 
 - [ ] Task 2.5: Implement SSH key retrieval from Doppler
   - Files: `bootstrap/termux.sh`
@@ -155,7 +157,7 @@ This implementation replaces the existing part-based compilation system with a c
 - [ ] Task 5.4: Test error handling
   - Files: N/A (test only)
   - Dependencies: Task 5.2
-  - Details: Test with invalid config, missing Doppler token, unreachable VM
+  - Details: Test with invalid config, no Doppler auth, unreachable VM
   - Validation: Clear error messages, graceful failures, no partial state
 
 - [ ] Task 5.5: Test curl-pipe workflow
@@ -205,7 +207,7 @@ This implementation replaces the existing part-based compilation system with a c
 **Error Cases:**
 - Missing config file
 - Invalid JSON in config
-- Invalid Doppler token
+- Doppler not authenticated
 - Doppler secrets not found
 - VM unreachable
 - Insufficient permissions
@@ -230,10 +232,10 @@ This implementation replaces the existing part-based compilation system with a c
 - Mitigation: Validate key format before writing, add newlines if needed
 - Fallback: Document manual key setup
 
-**Risk 3: Config file security**
-- Description: Doppler token stored in plaintext in config
-- Mitigation: Set 600 permissions, document security implications
-- Future: Consider using Termux keystore or encrypting config
+**Risk 3: Doppler authentication persistence**
+- Description: User may need to re-authenticate Doppler periodically
+- Mitigation: Clear error messages prompting user to run `doppler login`
+- Future: Document Doppler token expiration behavior
 
 **Risk 4: Breaking existing workflows**
 - Description: Replacing compilation system may break existing users
@@ -286,11 +288,12 @@ Estimated time: 3-4 hours for implementation + 1-2 hours for testing
 - Use platform detection even though Termux-only for now
 
 **Security:**
-- Config file permissions: 600 (user read/write only)
+- Config file permissions: 600 (user read/write only, though no secrets stored)
 - SSH private key: 600
 - SSH public key: 644
 - SSH directory: 700
 - Config directory: 700
+- Doppler authentication: Managed by Doppler CLI (uses secure token storage)
 
 **Performance:**
 - Minimize network calls (Doppler API)

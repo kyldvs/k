@@ -55,7 +55,6 @@ A streamlined bootstrap system for mobile AI-agent development that sets up a mi
 ```json
 {
   "doppler": {
-    "token": "dp.st.xxx",
     "project": "main",
     "env": "prd",
     "ssh_key_public": "SSH_GH_VM_PUBLIC",
@@ -69,26 +68,30 @@ A streamlined bootstrap system for mobile AI-agent development that sets up a mi
 }
 ```
 
+Note: Doppler authentication is handled via `doppler login` interactively, not stored in config.
+
 ## Bootstrap Flow
 
 ### Phase 1: Configure (Interactive)
 `bootstrap/configure.sh`:
-1. Prompt for Doppler token
-2. Prompt for VM hostname/IP
-3. Prompt for VM SSH port (default: 22)
-4. Prompt for VM username (default: kad)
-5. Prompt for Doppler project (default: main)
-6. Prompt for Doppler environment (default: prd)
-7. Prompt for SSH key names (defaults: SSH_GH_VM_PUBLIC/PRIVATE)
-8. Create `~/.config/kyldvs/k/configure.json`
-9. Set appropriate permissions (600)
+1. Prompt for VM hostname/IP
+2. Prompt for VM SSH port (default: 22)
+3. Prompt for VM username (default: kad)
+4. Prompt for Doppler project (default: main)
+5. Prompt for Doppler environment (default: prd)
+6. Prompt for SSH key names (defaults: SSH_GH_VM_PUBLIC/PRIVATE)
+7. Create `~/.config/kyldvs/k/configure.json`
+8. Set appropriate permissions (600)
 
 ### Phase 2: Bootstrap Termux
 `bootstrap/termux.sh`:
 1. Read configuration from `~/.config/kyldvs/k/configure.json`
 2. Install Termux packages: openssh, mosh-client, jq
 3. Install Doppler CLI
-4. Authenticate Doppler using token from config
+4. Check if Doppler is authenticated (`doppler configure get token`)
+   - If not authenticated: Display message to run `doppler login` and exit
+   - User runs `doppler login` interactively
+   - User re-runs bootstrap script
 5. Fetch SSH keys from Doppler and write to `~/.ssh/`
 6. Generate SSH config for VM connection
 7. Test SSH connection to VM
@@ -114,7 +117,7 @@ A streamlined bootstrap system for mobile AI-agent development that sets up a mi
 - No git required in Termux environment
 - SSH keys must never appear in public repository
 - Scripts must be publicly accessible (curl-pipeable)
-- Configuration file contains sensitive data (Doppler token)
+- Doppler authentication managed via `doppler login` (stored securely by Doppler CLI)
 
 ## Non-Goals
 - Git configuration in Termux
@@ -131,7 +134,6 @@ A streamlined bootstrap system for mobile AI-agent development that sets up a mi
 - User understands basic SSH/Mosh usage
 
 ## Open Questions
-- Should configure.sh validate Doppler token before saving?
 - Should bootstrap.sh create SSH key backup in Doppler if none exists?
 - How to handle SSH key rotation without re-running configure?
 - Should Mosh require specific port configuration?
