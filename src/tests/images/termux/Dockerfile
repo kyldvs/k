@@ -1,13 +1,10 @@
 FROM termux/termux-docker:x86_64
 
-# Copy bash server fixtures
+# Copy test fixtures (mock Doppler CLI, SSH keys, test config)
 COPY src/tests/fixtures /fixtures
 RUN chmod +x /fixtures/*.sh
 
-# Create test directories as root
+# Bootstrap scripts are mounted via docker-compose volumes at runtime
 RUN mkdir -p /var/www/bootstrap
-
-# Bash HTTP server replaces BusyBox httpd
-# xxd and nc are included in termux base image
 
 WORKDIR /data/data/com.termux/files/home
