@@ -33,14 +33,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Quick Reference
 
 ```bash
-# Most used commands
-just bootstrap build       # Build all bootstrap scripts
-just test all             # Test all configurations
-just vcs cm "msg"         # Add and commit
-just vcs push             # Push to remote
-
-# Development cycle
-just bootstrap build && just test all && just vcs cm "feat: xyz" && just vcs push
+just bootstrap build      # Compile parts into bootstrap scripts
+just test all            # Test all configs
+just vcs cm "msg"        # Commit with message
+just vcs push            # Push to remote
 ```
 
 ## Architecture Overview
@@ -100,145 +96,48 @@ script-recipe:        # Verbose bash script
 
 ## Bootstrap System
 
-### Overview
-Modular compilation system for environment setup scripts.
+Modular compilation: `src/parts/*.sh` → `just bootstrap build` → `bootstrap/*.sh`
 
-### Components
-- **Parts**: Individual setup functions (`src/parts/*.sh`)
-- **Configs**: JSON files listing parts (`src/bootstrap/*.json`)
-- **Builder**: Compiles parts into scripts (`tasks/bootstrap/`)
-- **Output**: Generated scripts (`bootstrap/*.sh`)
-
-### Creating Parts
-
-#### Structure Requirements
+### Part Structure
 ```bash
 # src/parts/example.sh
-
-# Idempotency check (required)
-_needs_example() {
-    # Return 0 if needed, 1 if already done
-    [ ! -f ~/.example_installed ]
-}
-
-# Platform-specific implementations (optional)
-_example_termux() {
-    # Termux-specific logic
-    pkg install -y example
-}
-
-_example_ubuntu() {
-    # Ubuntu-specific logic
-    apt-get install -y example
-}
-
-# Main implementation (required)
+_needs_example() { [ ! -f ~/.done ]; }  # Idempotency
+_example_termux() { pkg install -y example; }  # Platform-specific
 _example() {
-    kd_step_start "example" "Installing example"
-
-    if ! _needs_example; then
-        kd_step_skip "example already installed"
-        return 0
-    fi
-
-    # Use platform dispatch for multi-platform support
+    kd_step_start "example" "Installing"
+    ! _needs_example && { kd_step_skip "done"; return 0; }
     kd_platform_dispatch "example"
-
     kd_step_end
 }
-
-# Self-execution (required)
-_example
+_example  # Self-execute
 ```
 
-#### Best Practices
-- Use `return` not `exit` (runs in compiled context)
-- Non-interactive only (no prompts/read)
-- Idempotent - safe to run multiple times
-- Use utility functions for logging
-- Validate prerequisites first
-- Clean error messages
+### Key Functions
+- `kd_step_start/end/skip` - Step logging
+- `kd_log/info/warn/error` - Output helpers
+- `kd_platform_dispatch "name"` - Calls `_name_<platform>` automatically
+- `kd_get_platform` - Returns: termux, ubuntu, unknown
 
-#### Utility Functions
+### Commands
 ```bash
-# Step management
-kd_step_start "name" "description"  # Begin step
-kd_step_end                         # Complete step
-kd_step_skip "reason"              # Skip with explanation
-
-# Logging
-kd_log "message"                   # Indented output
-kd_info/warn/error "msg"           # Colored messages
-
-# Platform detection
-kd_get_platform                    # Returns: termux, ubuntu, unknown
-kd_is_termux                       # Check if running on Termux
-kd_is_ubuntu                       # Check if running on Ubuntu
-
-# Platform dispatch (convention over configuration)
-kd_platform_dispatch "function"    # Calls _function_<platform>
-                                   # Auto-detects platform and dispatches
+just bootstrap build          # Compile all
+just bootstrap build-one vm   # Single config
+just test all                # Full suite
 ```
 
-### Building & Testing
-```bash
-just bootstrap build         # Compile all configs
-just bootstrap build-one vm  # Single config
-just test config termux      # Test specific
-just test all               # Full test suite
-```
+## Testing
 
-### Platform Dispatch Pattern
-
-The codebase uses **convention over configuration** for platform-specific
-implementations. Instead of verbose case statements, use `kd_platform_dispatch`:
-
-```bash
-# OLD pattern (verbose, repetitive)
-_example() {
-    platform=$(kd_get_platform)
-    case "$platform" in
-        termux)
-            _example_termux
-            ;;
-        ubuntu)
-            _example_ubuntu
-            ;;
-        *)
-            kd_step_skip "platform not supported"
-            ;;
-    esac
-}
-
-# NEW pattern (DRY, convention-based)
-_example() {
-    kd_platform_dispatch "example"
-    # Automatically calls _example_termux or _example_ubuntu
-}
-```
-
-**Benefits:**
-- Eliminates repetitive case statements
-- Makes adding new platforms easier (just add `_name_platform` function)
-- Reduces boilerplate by ~10 lines per part
-- Self-documenting through naming convention
-
-## Testing Infrastructure
-
-Docker-based isolated environments test each config for correctness and idempotency. Tests use shared assertion helpers in `src/tests/lib/assertions.sh`.
+Docker-based tests validate correctness and idempotency using `src/tests/lib/assertions.sh`.
 
 ```bash
 # src/tests/tests/example.test.sh
 #!/usr/bin/env bash
 set -euo pipefail
 . /lib/assertions.sh
-
-curl -fsSL http://k.local/example.sh | bash  # Run bootstrap
-assert_file "/path/to/installed/file"        # Verify installation
-curl -fsSL http://k.local/example.sh | bash  # Test idempotency
+curl -fsSL http://k.local/example.sh | bash  # Run
+assert_file "/path/to/file"                  # Verify
+curl -fsSL http://k.local/example.sh | bash  # Idempotency
 ```
-
-**Termux quirks:** DNS requires ulimit fix; user switching between root (DNS) and system (pkg).
 
 ## Development Practices
 
@@ -305,30 +204,21 @@ just test config termux
 - Edit over create - modify existing files to maintain structure
 - Code speaks for itself - comments only when explicitly requested
 
-## Workflow Patterns
+## Workflows
 
-### Adding New Feature
-1. Create part in `src/parts/feature.sh` following structure template
-2. Add platform-specific implementations (`_feature_termux`, etc.)
-3. Add to config `src/bootstrap/config.json`
-4. Build: `just bootstrap build`
-5. Test: `just test config <name>`
-6. Commit: `just vcs cm "feat: add feature" && just vcs push`
+### Add Feature
+1. Create `src/parts/feature.sh` with structure template
+2. Add to `src/bootstrap/*.json`
+3. `just bootstrap build && just test all`
+4. `just vcs cm "feat: description" && just vcs push`
 
-### Adding New Platform
-1. Add platform detection to `kd_is_<platform>()` in util-functions.sh
-2. Update `kd_get_platform()` to return platform name
-3. Add `_<part>_<platform>()` implementations for needed parts
-4. Platform dispatch will automatically route to new implementations
+### Add Platform
+1. Add `kd_is_<platform>()` to util-functions.sh
+2. Update `kd_get_platform()` return value
+3. Add `_<part>_<platform>()` implementations
+4. Platform dispatch auto-routes to new functions
 
-### Fixing Bugs
-1. Reproduce in test environment
-2. Fix in `src/parts/`
-3. Verify: `just test all`
-4. Commit: `just vcs cm "fix: description" && just vcs push`
-
-### Refactoring
-1. Make changes
-2. Run full test suite
-3. Verify idempotency
-4. Commit: `just vcs cm "refactor: description" && just vcs push`
+### Fix/Refactor
+1. Edit `src/parts/*.sh`
+2. `just bootstrap build && just test all`
+3. `just vcs cm "fix|refactor: description" && just vcs push`

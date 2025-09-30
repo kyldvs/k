@@ -1,7 +1,4 @@
 {
-  "_comment": "DEPRECATED: Part-based compilation system replaced by config-driven bootstrap/termux.sh",
-  "_deprecated_date": "2025-09-30",
-  "_replacement": "See bootstrap/configure.sh and bootstrap/termux.sh for new approach",
   "parts": [
     "util-functions",
     "init-k",
