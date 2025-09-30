@@ -7,7 +7,8 @@
 set -euo pipefail
 
 MOCK_TOKEN="mock-doppler-token-12345"
-FIXTURES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Hardcoded fixtures path for test environment
+FIXTURES_DIR="/fixtures"
 
 # Mock doppler configure get token
 if [[ "${1:-}" == "configure" ]] && [[ "${2:-}" == "get" ]] && [[ "${3:-}" == "token" ]]; then
