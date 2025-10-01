@@ -18,7 +18,7 @@ This implementation adds minimal .profile initialization to bootstrap scripts us
 ## Task Breakdown
 
 ### Phase 1: Foundation
-- [ ] Task 1.1: Create profile initialization step function
+- [x] Task 1.1: Create profile initialization step function
   - Files: `bootstrap/lib/steps/profile-init.sh`
   - Dependencies: None
   - Details: Create `init_profile()` function with helper `kd_add_profile_line()`
@@ -29,14 +29,14 @@ This implementation adds minimal .profile initialization to bootstrap scripts us
     - Uses: kd_step_start/end/skip pattern from existing steps
 
 ### Phase 2: Core Implementation
-- [ ] Task 2.1: Implement editor config component
+- [x] Task 2.1: Implement editor config component
   - Files: `bootstrap/lib/steps/profile-init.sh`
   - Dependencies: Task 1.1
   - Details: Add editor config in init_profile()
     - Config content: `export EDITOR=nano`
     - Source line: `[ -f ~/.config/kyldvs/k/kd-editor.sh ] && . ~/.config/kyldvs/k/kd-editor.sh`
 
-- [ ] Task 2.2: Implement PATH config component
+- [x] Task 2.2: Implement PATH config component
   - Files: `bootstrap/lib/steps/profile-init.sh`
   - Dependencies: Task 1.1
   - Details: Add PATH config in init_profile()
@@ -45,23 +45,23 @@ This implementation adds minimal .profile initialization to bootstrap scripts us
     - Create ~/bin directory if it doesn't exist
 
 ### Phase 3: Integration
-- [ ] Task 3.1: Add profile-init to termux manifest
+- [x] Task 3.1: Add profile-init to termux manifest
   - Files: `bootstrap/manifests/termux.txt`
   - Dependencies: Tasks 2.1, 2.2
   - Details: Insert `lib/steps/profile-init.sh` after packages.sh, before next-steps.sh
 
-- [ ] Task 3.2: Add profile-init call to termux-main
+- [x] Task 3.2: Add profile-init call to termux-main
   - Files: `bootstrap/lib/steps/termux-main.sh`
   - Dependencies: Task 3.1
   - Details: Add `init_profile` call in main bootstrap sequence after install_packages
 
-- [ ] Task 3.3: Rebuild bootstrap scripts
+- [x] Task 3.3: Rebuild bootstrap scripts
   - Files: `bootstrap/termux.sh` (generated)
   - Dependencies: Task 3.2
   - Details: Run `just bootstrap build termux`
 
 ### Phase 4: Testing & Validation
-- [ ] Task 4.1: Add profile validation to mobile tests
+- [x] Task 4.1: Add profile validation to mobile tests
   - Files: `src/tests/tests/mobile-termux.test.sh`
   - Dependencies: Task 3.3
   - Details: Add test phase after Phase 12 for .profile validation
@@ -72,13 +72,13 @@ This implementation adds minimal .profile initialization to bootstrap scripts us
     - Verify EDITOR=nano in new shell
     - Verify ~/bin in PATH
 
-- [ ] Task 4.2: Test idempotency specifically for profile
+- [x] Task 4.2: Test idempotency specifically for profile
   - Files: `src/tests/tests/mobile-termux.test.sh`
   - Dependencies: Task 4.1
   - Details: Count source lines in .profile before/after second run
     - Should be exactly 2 lines (no duplicates)
 
-- [ ] Task 4.3: Run full test suite
+- [x] Task 4.3: Run full test suite
   - Files: N/A (test execution)
   - Dependencies: Task 4.2
   - Details: `just test all` - validate all mobile tests pass

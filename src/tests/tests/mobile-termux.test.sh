@@ -134,7 +134,49 @@ else
     echo "  ⚠ SSH connection failed (may need host key acceptance)"
 fi
 
-# Test Phase 12: Idempotency test
+# Test Phase 12: Profile validation
+echo "→ Validating .profile configuration"
+
+# Check .profile exists
+assert_file "$HOME/.profile"
+echo "  ✓ .profile exists"
+
+# Check config files exist
+assert_file "$HOME/.config/kyldvs/k/kd-editor.sh"
+assert_file "$HOME/.config/kyldvs/k/kd-path.sh"
+echo "  ✓ Config files created"
+
+# Check source lines in .profile
+assert_file_contains "$HOME/.profile" \
+  "[ -f ~/.config/kyldvs/k/kd-editor.sh ] && . ~/.config/kyldvs/k/kd-editor.sh"
+assert_file_contains "$HOME/.profile" \
+  "[ -f ~/.config/kyldvs/k/kd-path.sh ] && . ~/.config/kyldvs/k/kd-path.sh"
+echo "  ✓ Source lines present in .profile"
+
+# Check EDITOR is set in new shell
+editor_check=$(bash -lc 'echo $EDITOR')
+if [ "$editor_check" = "nano" ]; then
+  echo "  ✓ EDITOR=nano in new shell"
+else
+  echo "✗ FAIL: EDITOR is '$editor_check', expected 'nano'"
+  exit 1
+fi
+
+# Check ~/bin exists and is in PATH
+if [ ! -d "$HOME/bin" ]; then
+  echo "✗ FAIL: ~/bin directory does not exist"
+  exit 1
+fi
+
+path_check=$(bash -lc 'echo $PATH' | grep -F "$HOME/bin" || echo "")
+if [ -n "$path_check" ]; then
+  echo "  ✓ ~/bin in PATH"
+else
+  echo "✗ FAIL: ~/bin not found in PATH"
+  exit 1
+fi
+
+# Test Phase 13: Idempotency test
 echo "→ Testing idempotency (running script again)"
 idempotent_output=$(cat /var/www/bootstrap/termux.sh | bash 2>&1) || {
     echo "✗ FAIL: Second bootstrap run failed"
@@ -144,7 +186,23 @@ idempotent_output=$(cat /var/www/bootstrap/termux.sh | bash 2>&1) || {
 
 # Check for no errors in output
 assert_no_errors "$idempotent_output"
-echo "  ✓ Idempotency validated"
+
+# Check profile source lines not duplicated
+profile_line_count=$(grep -cF "[ -f ~/.config/kyldvs/k/kd-editor.sh ]" \
+  "$HOME/.profile")
+if [ "$profile_line_count" -ne 1 ]; then
+  echo "✗ FAIL: Editor source line appears $profile_line_count times, expected 1"
+  exit 1
+fi
+
+profile_line_count=$(grep -cF "[ -f ~/.config/kyldvs/k/kd-path.sh ]" \
+  "$HOME/.profile")
+if [ "$profile_line_count" -ne 1 ]; then
+  echo "✗ FAIL: PATH source line appears $profile_line_count times, expected 1"
+  exit 1
+fi
+
+echo "  ✓ Idempotency validated (no duplicate profile lines)"
 
 echo ""
 echo "✓ All mobile bootstrap tests passed"
@@ -160,4 +218,5 @@ echo "  - Termux properties configuration (extra-keys)"
 echo "  - Termux colors configuration (base16-monokai)"
 echo "  - Termux font installation (JetBrains Mono Nerd Font)"
 echo "  - SSH connectivity to mock-vm"
+echo "  - Profile initialization (EDITOR, PATH)"
 echo "  - Idempotency (safe to run multiple times)"

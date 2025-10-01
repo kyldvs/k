@@ -5,6 +5,7 @@ main() {
   configure_termux_colors
   configure_termux_font
   install_packages
+  init_profile
   install_proot_distro
   install_alpine
   install_doppler_alpine

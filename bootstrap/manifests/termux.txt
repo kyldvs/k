@@ -8,6 +8,7 @@ lib/steps/termux-properties.sh
 lib/steps/termux-colors.sh
 lib/steps/termux-font.sh
 lib/steps/packages.sh
+lib/steps/profile-init.sh
 lib/steps/proot-distro.sh
 lib/steps/alpine.sh
 lib/steps/doppler-alpine.sh
