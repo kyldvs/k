@@ -16,6 +16,9 @@ init_profile() {
     chmod 700 "$HOME/.config/kyldvs/k"
   fi
 
+  # Track if any changes were made
+  local changes_made=0
+
   # Helper function to add profile line idempotently
   kd_add_profile_line() {
     local config_name="$1"
@@ -25,7 +28,7 @@ init_profile() {
     # Check if source line already exists (idempotency)
     if grep -qF "$source_line" "$HOME/.profile" 2>/dev/null; then
       kd_log "Skipping $config_name (already in profile)"
-      return 0
+      return 1
     fi
 
     # Create config file
@@ -35,13 +38,17 @@ init_profile() {
 
     # Add source line to profile
     printf "\n%s\n" "$source_line" >> "$HOME/.profile"
+    return 0
   }
 
   # Add editor config
-  kd_add_profile_line \
+  if kd_add_profile_line \
     "kd-editor" \
     "export EDITOR=nano" \
     "[ -f ~/.config/kyldvs/k/kd-editor.sh ] && . ~/.config/kyldvs/k/kd-editor.sh"
+  then
+    changes_made=1
+  fi
 
   # Create ~/bin directory if needed
   if [ ! -d "$HOME/bin" ]; then
@@ -50,10 +57,18 @@ init_profile() {
   fi
 
   # Add PATH config
-  kd_add_profile_line \
+  if kd_add_profile_line \
     "kd-path" \
     "export PATH=\"\$HOME/bin:\$PATH\"" \
     "[ -f ~/.config/kyldvs/k/kd-path.sh ] && . ~/.config/kyldvs/k/kd-path.sh"
+  then
+    changes_made=1
+  fi
 
-  kd_step_end
+  # End step appropriately
+  if [ $changes_made -eq 0 ]; then
+    kd_step_skip "profile already configured"
+  else
+    kd_step_end
+  fi
 }
