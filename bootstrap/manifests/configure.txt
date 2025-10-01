@@ -1,0 +1,5 @@
+lib/utils/header-configure.sh
+lib/utils/colors.sh
+lib/utils/prompt.sh
+lib/utils/validate.sh
+lib/steps/configure-main.sh

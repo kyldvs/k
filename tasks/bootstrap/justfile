@@ -1,0 +1,52 @@
+set fallback := true
+set shell := ["bash", "-uc"]
+set ignore-comments
+
+# Build all bootstrap scripts
+[no-cd]
+@build-all:
+  just bootstrap build configure
+  just bootstrap build termux
+
+# Build specific bootstrap script from manifest
+[no-cd]
+build script:
+  #!/usr/bin/env bash
+  set -euo pipefail
+
+  SCRIPT="{{script}}"
+  BOOTSTRAP_DIR="bootstrap"
+  MANIFEST="$BOOTSTRAP_DIR/manifests/$SCRIPT.txt"
+  OUTPUT="$BOOTSTRAP_DIR/$SCRIPT.sh"
+
+  if [ ! -f "$MANIFEST" ]; then
+    echo "Error: Manifest not found: $MANIFEST" >&2
+    exit 1
+  fi
+
+  # Create temp file
+  TEMP=$(mktemp)
+  trap "rm -f $TEMP" EXIT
+
+  # Read manifest and concatenate components
+  while IFS= read -r component || [ -n "$component" ]; do
+    # Skip empty lines and comments
+    [[ -z "$component" || "$component" =~ ^[[:space:]]*# ]] && continue
+
+    COMPONENT_FILE="$BOOTSTRAP_DIR/$component"
+
+    if [ ! -f "$COMPONENT_FILE" ]; then
+      echo "Error: Component not found: $COMPONENT_FILE" >&2
+      exit 1
+    fi
+
+    # Append component with blank line separator
+    cat "$COMPONENT_FILE" >> "$TEMP"
+    echo "" >> "$TEMP"
+  done < "$MANIFEST"
+
+  # Write to output and make executable
+  mv "$TEMP" "$OUTPUT"
+  chmod +x "$OUTPUT"
+
+  echo "Built $OUTPUT from $MANIFEST"
