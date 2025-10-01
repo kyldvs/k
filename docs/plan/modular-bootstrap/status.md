@@ -3,7 +3,7 @@
 **Status**: Completed
 
 ## Progress Summary
-- Tasks Completed: 29 / 32
+- Tasks Completed: 30 / 32
 - Current Phase: Complete
 - Estimated Completion: 100%
 
@@ -27,9 +27,10 @@ None - Implementation complete
 - [x] Phase 6: Testing & Validation (Task 6.1)
   - All tests pass (`just test all`)
   - Idempotency validated
-- [x] Phase 7: Documentation (Task 7.1)
+- [x] Phase 7: Documentation and Cleanup (Tasks 7.1-7.2)
   - Updated CLAUDE.md with build system documentation
   - Updated bootstrap workflow section
+  - Added `just bootstrap build-all` to pre-commit hook
 
 ## In Progress
 None
@@ -38,10 +39,7 @@ None
 None
 
 ## Future Tasks Discovered
-- [ ] Task 7.2: Add build to pre-commit workflow (optional)
-  - Marked as optional in implementation plan
-  - Can be added later if needed to auto-rebuild on commit
-  - Priority: Low
+None - all optional tasks completed
 
 ## Notes & Decisions
 - Approach: Direct implementation (per impl.md recommendation)
@@ -80,6 +78,11 @@ Successfully implemented modular bootstrap component system:
 - Duplication eliminated: Colors, logging, step management now shared
 - Generated outputs: configure.sh (160 lines), termux.sh (528 lines)
 
-**Next Steps (Optional):**
-- Task 7.2: Add `just bootstrap build-all` to pre-commit hook if desired
-- Future: Extract VM bootstrap script when implemented
+**Pre-Commit Integration:**
+- Build scripts automatically regenerate on commit
+- Ensures component changes are always reflected in generated scripts
+- No manual build step required
+
+**Future Expansion:**
+- Extract VM bootstrap script when `bootstrap/vm.sh` is implemented
+- Can reuse existing components (colors, logging, steps, etc.)
