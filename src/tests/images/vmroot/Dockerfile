@@ -1,10 +1,14 @@
-FROM alpine:3.19
+FROM ubuntu:22.04
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install required packages for vmroot bootstrap
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     sudo \
     jq \
-    bash
+    bash \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /root

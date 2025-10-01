@@ -5,7 +5,7 @@ set -euo pipefail
 # Tests vmroot-configure.sh and vmroot.sh scripts
 
 # Source shared assertion helpers
-. /lib/assertions.sh
+. /test-lib/assertions.sh
 
 echo "→ Testing vmroot bootstrap"
 
@@ -57,7 +57,10 @@ else
 fi
 
 # Verify home directory
-assert_file "/home/testuser"
+if [ ! -d "/home/testuser" ]; then
+  echo "✗ FAIL: Home directory /home/testuser does not exist"
+  exit 1
+fi
 echo "  ✓ Home directory exists"
 
 # Test Phase 4: Validate sudoers configuration
