@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Info
 
-**`k`** - kyldvs dotfiles
+**`kyldvs/k`** - kyldvs dotfiles
 
 ## Core Principles
 
