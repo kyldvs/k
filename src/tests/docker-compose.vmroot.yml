@@ -1,0 +1,11 @@
+services:
+  vmroot-test:
+    image: k-test-vmroot
+    container_name: k-test-vmroot
+    build:
+      context: ../..
+      dockerfile: src/tests/images/vmroot/Dockerfile
+    volumes:
+      - ./bootstrap:/var/www/bootstrap:ro
+      - ./src/tests/lib:/lib:ro
+      - ./src/tests/fixtures:/fixtures:ro

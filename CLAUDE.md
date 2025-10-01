@@ -33,9 +33,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Quick Reference
 
 ```bash
-just test all            # Run mobile tests
+just test all            # Run all tests
+just test mobile termux  # Run mobile termux tests
+just test vmroot         # Run vmroot tests
 just vcs cm "msg"        # Commit with message
 just vcs push            # Push to remote
+just bootstrap build-all # Build all bootstrap scripts
 ```
 
 ## Architecture Overview
@@ -118,6 +121,8 @@ just bootstrap build-all        # Build all scripts
 ### Scripts
 - `bootstrap/configure.sh` - Interactive setup, creates `~/.config/kyldvs/k/configure.json`
 - `bootstrap/termux.sh` - Minimal Termux environment with SSH/Mosh to VM
+- `bootstrap/vmroot-configure.sh` - VM root config, creates `/root/.config/kyldvs/k/vmroot-configure.json`
+- `bootstrap/vmroot.sh` - VM root bootstrap, provisions non-root user with sudo/SSH
 - `bootstrap/vm.sh` - Future VM provisioning (stub)
 
 ### Key Functions
@@ -126,11 +131,17 @@ just bootstrap build-all        # Build all scripts
 
 ### Usage
 ```bash
-# One-time configuration
+# One-time configuration (Termux)
 bash <(curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/configure.sh)
 
 # Bootstrap Termux environment
 curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/termux.sh | sh
+
+# Configure VM root bootstrap (run as root on VM)
+curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/vmroot-configure.sh | sh
+
+# Bootstrap VM root user (run as root on VM)
+curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/vmroot.sh | sh
 ```
 
 ## Testing
@@ -139,8 +150,9 @@ Docker Compose-based mobile tests validate bootstrap scripts with mocked depende
 
 ```bash
 # Run tests
-just test all            # Run mobile termux tests
+just test all            # Run all tests (mobile + vmroot)
 just test mobile termux  # Explicit mobile test
+just test vmroot         # VM root bootstrap test
 just test clean          # Cleanup containers/images
 
 # Test structure
@@ -228,3 +240,9 @@ just test mobile termux
 2. Add new assertions using `src/tests/lib/assertions.sh`
 3. `just test mobile termux`
 4. `just vcs cm "test: description" && just vcs push`
+
+### Bootstrap VM with Root User
+1. On VM as root: `curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/vmroot-configure.sh | sh`
+2. Answer prompts (username, homedir)
+3. Run bootstrap: `curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/vmroot.sh | sh`
+4. Verify: `su - <username> -c 'sudo whoami'` (should print "root")
