@@ -103,7 +103,13 @@ assert_file_contains "$HOME/.ssh/config" "HostName mock-vm"
 assert_file_contains "$HOME/.ssh/config" "User testuser"
 assert_file_contains "$HOME/.ssh/config" "IdentityFile ~/.ssh/gh_vm"
 
-# Test Phase 8: Validate SSH connectivity to mock-vm
+# Test Phase 8: Validate Termux properties configuration
+echo "→ Validating Termux properties"
+assert_file "$HOME/.config/termux/termux.properties"
+assert_file_contains "$HOME/.config/termux/termux.properties" "extra-keys = "
+assert_file_contains "$HOME/.config/termux/termux.properties" "['ESC','/','-','|','PGDN','UP','PGUP']"
+
+# Test Phase 9: Validate SSH connectivity to mock-vm
 echo "→ Testing SSH connectivity to mock-vm"
 if ssh -q -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=no \
     vm exit 2>/dev/null; then
@@ -112,7 +118,7 @@ else
     echo "  ⚠ SSH connection failed (may need host key acceptance)"
 fi
 
-# Test Phase 9: Idempotency test
+# Test Phase 10: Idempotency test
 echo "→ Testing idempotency (running script again)"
 idempotent_output=$(cat /var/www/bootstrap/termux.sh | bash 2>&1) || {
     echo "✗ FAIL: Second bootstrap run failed"
@@ -134,5 +140,6 @@ echo "  - Doppler CLI installation in Alpine"
 echo "  - Doppler wrapper creation and functionality"
 echo "  - SSH key retrieval from Doppler"
 echo "  - SSH config generation"
+echo "  - Termux properties configuration (extra-keys)"
 echo "  - SSH connectivity to mock-vm"
 echo "  - Idempotency (safe to run multiple times)"
