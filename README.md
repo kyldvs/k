@@ -8,7 +8,7 @@ dotfiles
 
 1. **Configure** (one-time setup):
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/configure.sh | sh
+bash <(curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/configure.sh)
 ```
 
 2. **Bootstrap** your Termux environment:

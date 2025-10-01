@@ -106,7 +106,7 @@ Config-driven bootstrap for mobile development environments.
 ### Usage
 ```bash
 # One-time configuration
-curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/configure.sh | sh
+bash <(curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/configure.sh)
 
 # Bootstrap Termux environment
 curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/termux.sh | sh
