@@ -375,8 +375,7 @@ EOF
 check_doppler_auth() {
   kd_step_start "doppler-auth" "Checking Doppler authentication"
 
-  if ! "$HOME/bin/doppler" configure get token --plain --silent >/dev/null 2>&1
-  then
+  if ! "$HOME/bin/doppler" me >/dev/null 2>&1; then
     kd_log ""
     kd_error "Doppler is not authenticated"
     kd_error ""
