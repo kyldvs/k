@@ -1,0 +1,10 @@
+lib/utils/header-vmroot.sh
+lib/utils/colors.sh
+lib/utils/logging.sh
+lib/utils/steps.sh
+lib/utils/vmroot-config-path.sh
+lib/steps/vmroot-check-config.sh
+lib/steps/vmroot-user.sh
+lib/steps/vmroot-sudo.sh
+lib/steps/vmroot-ssh.sh
+lib/steps/vmroot-main.sh

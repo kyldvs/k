@@ -7,6 +7,8 @@ set ignore-comments
 @build-all:
   just bootstrap build configure
   just bootstrap build termux
+  just bootstrap build vmroot-configure
+  just bootstrap build vmroot
 
 # Build specific bootstrap script from manifest
 [no-cd]
