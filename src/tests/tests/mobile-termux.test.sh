@@ -109,7 +109,23 @@ assert_file "$HOME/.config/termux/termux.properties"
 assert_file_contains "$HOME/.config/termux/termux.properties" "extra-keys = "
 assert_file_contains "$HOME/.config/termux/termux.properties" "['ESC','/','-','|','PGDN','UP','PGUP']"
 
-# Test Phase 9: Validate SSH connectivity to mock-vm
+# Test Phase 9: Validate Termux colors configuration
+echo "→ Validating Termux colors"
+assert_file "$HOME/.termux/colors.properties"
+assert_file_contains "$HOME/.termux/colors.properties" "foreground="
+assert_file_contains "$HOME/.termux/colors.properties" "background="
+assert_file_contains "$HOME/.termux/colors.properties" "base16-monokai"
+
+# Test Phase 10: Validate Termux font installation
+echo "→ Validating Termux font"
+assert_file "$HOME/.termux/font.ttf"
+if [ ! -s "$HOME/.termux/font.ttf" ]; then
+    echo "✗ FAIL: Font file is empty"
+    exit 1
+fi
+echo "  ✓ Font file exists and is not empty"
+
+# Test Phase 11: Validate SSH connectivity to mock-vm
 echo "→ Testing SSH connectivity to mock-vm"
 if ssh -q -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=no \
     vm exit 2>/dev/null; then
@@ -118,7 +134,7 @@ else
     echo "  ⚠ SSH connection failed (may need host key acceptance)"
 fi
 
-# Test Phase 10: Idempotency test
+# Test Phase 12: Idempotency test
 echo "→ Testing idempotency (running script again)"
 idempotent_output=$(cat /var/www/bootstrap/termux.sh | bash 2>&1) || {
     echo "✗ FAIL: Second bootstrap run failed"
@@ -141,5 +157,7 @@ echo "  - Doppler wrapper creation and functionality"
 echo "  - SSH key retrieval from Doppler"
 echo "  - SSH config generation"
 echo "  - Termux properties configuration (extra-keys)"
+echo "  - Termux colors configuration (base16-monokai)"
+echo "  - Termux font installation (JetBrains Mono Nerd Font)"
 echo "  - SSH connectivity to mock-vm"
 echo "  - Idempotency (safe to run multiple times)"
