@@ -94,6 +94,27 @@ script-recipe:        # Verbose bash script
 
 Config-driven bootstrap for mobile development environments.
 
+### Architecture
+Bootstrap scripts are built from modular components:
+```
+bootstrap/
+├── lib/                   # Reusable components
+│   ├── utils/            # Core utilities (colors, logging, steps)
+│   └── steps/            # Installation steps
+├── manifests/            # Build manifests
+│   ├── configure.txt     # Component list for configure.sh
+│   └── termux.txt        # Component list for termux.sh
+├── configure.sh          # Generated (committed)
+└── termux.sh             # Generated (committed)
+```
+
+Build system concatenates components based on manifests:
+```bash
+just bootstrap build configure  # Build configure.sh
+just bootstrap build termux     # Build termux.sh
+just bootstrap build-all        # Build all scripts
+```
+
 ### Scripts
 - `bootstrap/configure.sh` - Interactive setup, creates `~/.config/kyldvs/k/configure.json`
 - `bootstrap/termux.sh` - Minimal Termux environment with SSH/Mosh to VM
@@ -197,9 +218,10 @@ just test mobile termux
 ## Workflows
 
 ### Modify Bootstrap Scripts
-1. Edit `bootstrap/termux.sh` or `bootstrap/configure.sh`
-2. `just test all`
-3. `just vcs cm "fix|refactor: description" && just vcs push`
+1. Edit component files in `bootstrap/lib/utils/` or `bootstrap/lib/steps/`
+2. Run `just bootstrap build-all` to regenerate scripts
+3. `just test all`
+4. `just vcs cm "fix|refactor: description" && just vcs push`
 
 ### Add Mobile Test Assertions
 1. Update `src/tests/tests/mobile-termux.test.sh`
