@@ -1,6 +1,6 @@
 # Less but Better
 
-> **Note:** This document is included verbatim in CLAUDE.md. Keep them in sync.
+> **Note:** These are important principles in this repository that should always be followed.
 
 Software engineering principles inspired by Dieter Rams' design philosophy: "Weniger, aber besser" (Less, but better).
 
