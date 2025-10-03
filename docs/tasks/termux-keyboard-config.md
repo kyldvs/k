@@ -101,11 +101,28 @@ configure_termux_keyboard() {
 
 ## Priority
 
-**Medium** - Quality of life improvement, not critical for functionality.
+**Low** - Quality of life improvement, not critical for functionality.
 
 This task enhances user experience but is not blocking for core bootstrap
-functionality. Could be deferred in favor of higher-priority tasks like
-vm-user-bootstrap or vmroot-test-fixes.
+functionality. Should be deferred in favor of higher-priority tasks like
+refactor-error-handling, vmroot-test-fixes, and vm-user-bootstrap.
+
+## Estimated Effort
+
+1-2 hours
+
+## Related Principles
+
+- **#2 Good Code is Useful**: Solves real problem (efficient mobile terminal
+  usage) without overengineering
+- **#5 Good Code is Unobtrusive**: Smart defaults that fade into background;
+  users shouldn't need to think about keyboard config
+- **#10 As Little Code as Possible**: Prefer simple defaults over complex
+  configuration system
+
+## Dependencies
+
+None
 
 ## Alternative Approaches
 

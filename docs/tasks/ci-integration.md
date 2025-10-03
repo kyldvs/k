@@ -158,6 +158,18 @@ jobs:
 
 **Medium** - Valuable for code quality, but not blocking development.
 
+## Estimated Effort
+
+2-3 hours
+
+## Related Principles
+
+- **#9 Good Code is Sustainable**: Automated testing enables long-term
+  maintainability and reduces cognitive load
+- **#8 Good Code is Thorough**: CI catches regressions and validates edge
+  cases automatically
+- **#7 Good Code is Long-lasting**: Automated tests help code age gracefully
+
 ## Incremental Approach
 
 Phase 1: Basic workflow

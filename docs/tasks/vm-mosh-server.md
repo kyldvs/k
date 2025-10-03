@@ -116,7 +116,24 @@ install_mosh_server() {
 
 ## Priority
 
-**Low-Medium** - Nice to have, but basic SSH works. May already be functional.
+**Low** - Nice to have, but basic SSH works. May already be functional.
+
+## Estimated Effort
+
+2-3 hours
+
+## Related Principles
+
+- **#7 Good Code is Long-lasting**: Mosh provides robust, long-lived
+  connections that survive network changes
+- **#2 Good Code is Useful**: Solves real problem (mobile connectivity) but
+  only if needed
+- **#10 As Little Code as Possible**: Should verify problem exists before
+  implementing solution
+
+## Dependencies
+
+- vm-user-bootstrap (mosh should be configured as part of complete VM setup)
 
 ## Investigation First
 

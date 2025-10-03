@@ -188,6 +188,19 @@ All tasks benefit from clear prioritization
 
 **Low** - Organizational, not blocking development
 
+## Related Principles
+
+- **#9 Good Code is Sustainable**: Organized documentation reduces cognitive
+  load and enables long-term maintainability
+- **#4 Good Code is Understandable**: Clear priorities help contributors
+  understand what matters most
+- **#10 As Little Code as Possible**: Archive old work to remove clutter
+- **#2 Good Code is Useful**: Focus on what matters through prioritization
+
+## Dependencies
+
+None - organizational task
+
 ## Incremental Approach
 
 1. Create new task files from principles reflection

@@ -1,5 +1,11 @@
 # Bootstrap Error Recovery
 
+> **⚠️ SUPERSEDED:** This task has been superseded by
+> [refactor-error-handling.md](./refactor-error-handling.md) which has more
+> focused scope and better aligns with principles #6 (Honest) and #10 (As
+> Little Code as Possible). The new task focuses on retry logic and error
+> types without overengineering features like checkpoint/resume systems.
+
 ## Description
 
 Improve error handling and recovery flows in bootstrap scripts. Currently,

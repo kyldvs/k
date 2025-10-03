@@ -93,6 +93,27 @@ curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/vm.sh | sh
 - bootstrap/termux.sh (mobile environment, complete)
 - docs/plan/vm-root-bootstrap/ (related root setup docs)
 
+## Priority
+
+**Low** - Large feature that completes the VM setup stack, but not urgent.
+Higher priority tasks (error handling, test fixes, CI) should be completed
+first.
+
+## Estimated Effort
+
+8-10 hours
+
+## Related Principles
+
+- **#2 Good Code is Useful**: Completes the development environment stack,
+  solving real user needs
+- **#10 As Little Code as Possible**: Complete the stack with minimal
+  additional complexity; reuse existing patterns
+- **#9 Good Code is Sustainable**: Consistent tooling and environment reduces
+  cognitive load
+- **#5 Good Code is Unobtrusive**: Setup should be invisible once complete;
+  tools just work
+
 ## References
 
 Historical todo.md items covered by this task:

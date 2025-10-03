@@ -99,6 +99,23 @@ Exit code 255 typically indicates:
 - bootstrap/vmroot.sh
 - bootstrap/vmroot-configure.sh
 
+## Priority
+
+**High** - Blocks CI integration and automated testing infrastructure.
+
+## Estimated Effort
+
+1-2 hours
+
+## Related Principles
+
+- **#8 Good Code is Thorough**: Tests validate all functionality and edge
+  cases; fixing tests ensures thoroughness
+- **#9 Good Code is Sustainable**: Reliable automated tests enable long-term
+  maintainability
+- **#2 Good Code is Useful**: Working tests are essential for confident
+  development
+
 ## References
 
 - docs/plan/vm-root-bootstrap/status.md (notes exit 255 issue)
