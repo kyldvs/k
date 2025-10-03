@@ -29,6 +29,7 @@ services:
       - ../../bootstrap:/var/www/bootstrap:ro
       - ./lib:/lib:ro
       - ./fixtures:/fixtures:ro
+      - ./tests:/tests:ro
     ulimits:
       nofile:
         soft: 65536

@@ -35,10 +35,87 @@ else
   KD_BOLD=''
 fi
 
+#!/usr/bin/env sh
+# Input validation functions for bootstrap configuration
+# All validators return 0 (valid) or 1 (invalid)
+
+# Validate hostname format (RFC 1123)
+# Valid: alphanumeric, dots, hyphens; max 253 chars
+# Must start/end with alphanumeric (no leading/trailing hyphens or dots)
+# Examples: example.com, 192.168.1.1, host-name.example.com
+validate_hostname() {
+  local hostname="$1"
+
+  # Check not empty
+  [ -z "$hostname" ] && return 1
+
+  # Check length (max 253 chars per RFC 1123)
+  [ ${#hostname} -gt 253 ] && return 1
+
+  # Check format: alphanumeric with dots/hyphens
+  # Each label max 63 chars, must start/end with alphanumeric
+  echo "$hostname" | grep -qE '^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$'
+}
+
+# Validate port number (1-65535)
+# Valid: integer in range 1-65535
+# Examples: 22, 8080, 65535
+validate_port() {
+  local port="$1"
+
+  # Check not empty
+  [ -z "$port" ] && return 1
+
+  # Check is integer (only digits)
+  echo "$port" | grep -qE '^[0-9]+$' || return 1
+
+  # Check range (1-65535)
+  [ "$port" -ge 1 ] && [ "$port" -le 65535 ]
+}
+
+# Validate username (POSIX portable username rules)
+# Valid: lowercase letters, digits, underscore, hyphen; max 32 chars
+# Must start with lowercase letter or underscore
+# Examples: john, _user, user-name, kad123
+validate_username() {
+  local username="$1"
+
+  # Check not empty
+  [ -z "$username" ] && return 1
+
+  # Check length (max 32 chars per POSIX)
+  [ ${#username} -gt 32 ] && return 1
+
+  # Check format: start with letter or underscore, then alphanumeric/_/-
+  echo "$username" | grep -qE '^[a-z_][a-z0-9_-]*$'
+}
+
+# Validate directory path
+# Valid: absolute path starting with /, no shell injection chars
+# Examples: /home, /mnt/kad, /usr/local/bin
+validate_directory() {
+  local dir="$1"
+
+  # Check not empty
+  [ -z "$dir" ] && return 1
+
+  # Check starts with / (absolute path)
+  case "$dir" in
+    /*) ;;
+    *) return 1 ;;
+  esac
+
+  # Check no shell injection characters
+  echo "$dir" | grep -qE '[<>|;&$`]' && return 1
+
+  return 0
+}
+
 # Configuration file path for vmroot
 VMROOT_CONFIG_DIR="/root/.config/kyldvs/k"
 VMROOT_CONFIG_FILE="$VMROOT_CONFIG_DIR/vmroot-configure.json"
 
+#!/usr/bin/env sh
 # Prompt helper function for vmroot
 vmroot_prompt() {
   local prompt_text="$1"
@@ -58,6 +135,30 @@ vmroot_prompt() {
   fi
 
   eval "$var_name=\"\$value\""
+}
+
+# Validated prompt helper function for vmroot
+# Loops until valid input is received
+vmroot_prompt_validated() {
+  local prompt_text="$1"
+  local default_value="$2"
+  local var_name="$3"
+  local validator="$4"
+  local error_msg="$5"
+
+  while true; do
+    # Get user input using standard prompt
+    vmroot_prompt "$prompt_text" "$default_value" "$var_name"
+    eval "value=\$$var_name"
+
+    # Validate input
+    if $validator "$value"; then
+      return 0
+    fi
+
+    # Show error and re-prompt
+    printf "%s✗ Invalid input:%s %s\n" "$KD_RED" "$KD_RESET" "$error_msg"
+  done
 }
 
 # Validation function for vmroot configuration
@@ -87,6 +188,7 @@ validate_vmroot_config() {
   return 0
 }
 
+#!/usr/bin/env sh
 # Main configuration flow for vmroot
 main() {
   printf "\n%s%sVM Root Bootstrap Configuration%s\n" "$KD_BOLD" "$KD_CYAN" "$KD_RESET"
@@ -94,8 +196,10 @@ main() {
 
   # Prompt for configuration
   printf "%s%sUser Configuration:%s\n" "$KD_BOLD" "$KD_YELLOW" "$KD_RESET"
-  vmroot_prompt "Username" "kad" username
-  vmroot_prompt "Home directory" "/mnt/kad" homedir
+  vmroot_prompt_validated "Username" "kad" username validate_username \
+    "Username must start with letter/underscore, contain only lowercase letters, digits, underscore, hyphen"
+  vmroot_prompt_validated "Home directory" "/mnt/kad" homedir validate_directory \
+    "Directory must be absolute path starting with /"
 
   printf "\n"
 

@@ -1,5 +1,6 @@
 lib/utils/header-vmroot-configure.sh
 lib/utils/colors.sh
+lib/utils/validators.sh
 lib/utils/vmroot-config-path.sh
 lib/utils/vmroot-prompt.sh
 lib/utils/vmroot-validate.sh

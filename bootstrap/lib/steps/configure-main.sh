@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 # Main configuration flow
 main() {
   printf "\n%s%sConfiguration Setup%s\n" "$KD_BOLD" "$KD_CYAN" "$KD_RESET"
@@ -5,9 +6,12 @@ main() {
 
   # VM Configuration
   printf "%s%sVM Configuration:%s\n" "$KD_BOLD" "$KD_YELLOW" "$KD_RESET"
-  prompt "VM hostname/IP" "" vm_hostname
-  prompt "VM SSH port" "22" vm_port
-  prompt "VM username" "kad" vm_username
+  prompt_validated "VM hostname/IP" "" vm_hostname validate_hostname \
+    "Hostname must be alphanumeric with dots/hyphens (e.g., 192.168.1.1 or host.example.com)"
+  prompt_validated "VM SSH port" "22" vm_port validate_port \
+    "Port must be 1-65535"
+  prompt_validated "VM username" "kad" vm_username validate_username \
+    "Username must start with letter/underscore, contain only lowercase letters, digits, underscore, hyphen"
 
   printf "\n"
 

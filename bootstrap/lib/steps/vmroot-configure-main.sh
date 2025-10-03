@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 # Main configuration flow for vmroot
 main() {
   printf "\n%s%sVM Root Bootstrap Configuration%s\n" "$KD_BOLD" "$KD_CYAN" "$KD_RESET"
@@ -5,8 +6,10 @@ main() {
 
   # Prompt for configuration
   printf "%s%sUser Configuration:%s\n" "$KD_BOLD" "$KD_YELLOW" "$KD_RESET"
-  vmroot_prompt "Username" "kad" username
-  vmroot_prompt "Home directory" "/mnt/kad" homedir
+  vmroot_prompt_validated "Username" "kad" username validate_username \
+    "Username must start with letter/underscore, contain only lowercase letters, digits, underscore, hyphen"
+  vmroot_prompt_validated "Home directory" "/mnt/kad" homedir validate_directory \
+    "Directory must be absolute path starting with /"
 
   printf "\n"
 
