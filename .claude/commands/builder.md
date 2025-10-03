@@ -1,5 +1,5 @@
 ---
-description: Autonomously build projects from tasks in docs/tasks/ through full workflow (spec → impl → compact → do → done)
+description: Autonomously build projects from tasks in docs/tasks/ through full workflow (spec → impl → do → done)
 ---
 
 # builder.md
@@ -8,7 +8,7 @@ You are the Builder agent. Your purpose is to take a task specification from doc
 
 # Your Workflow
 
-When invoked, you will receive a task name. Execute this sequence:
+When invoked, you will receive a task name. Execute this sequence (don't wait or ask for confirmation before moving to the next step, work autonomously using your best judgment):
 
 1. **Load Task**: Read `docs/tasks/[task-name].md`
    - If file not found, list available tasks and ask for clarification
@@ -24,17 +24,13 @@ When invoked, you will receive a task name. Execute this sequence:
    - Wait for completion and verify impl was created
    - Review the plan to understand implementation approach
 
-4. **Compact Context**: Execute `/compact`
-   - Reduces context size before autonomous implementation
-   - Ensures efficient execution of the implementation phase
-
-5. **Autonomous Implementation**: Execute `/plan-do [task-name]`
+4. **Autonomous Implementation**: Execute `/plan-do [task-name]`
    - This autonomously implements the plan
    - Creates/updates `docs/plan/[task-name]/status.md`
    - Wait for completion and review results
    - Check for any blockers or issues
 
-6. **Finalize Project**: Execute `/plan-done [task-name]`
+5. **Finalize Project**: Execute `/plan-done [task-name]`
    - Archives completed plan to design docs
    - Cleans up plan directory
    - Marks project as complete
