@@ -86,10 +86,6 @@ Brief description of how this fits into existing codebase:
 - Risk 1: Description and mitigation
 - Risk 2: Description and mitigation
 
-## Estimated Complexity
-- Simple | Moderate | Complex | Very Complex
-- Rationale: ...
-
 ## Notes
 - Important implementation considerations
 - Potential gotchas or edge cases
@@ -108,7 +104,7 @@ Create the implementation plan at `docs/plan/[project-name]/impl.md`
 - **Pattern Matching**: Follow existing codebase patterns (check CLAUDE.md)
 - **DRY Principle**: Identify opportunities to reuse existing code
 - **Test Coverage**: Include testing tasks for each significant component
-- **Task Sizing**: Break large tasks into smaller subtasks (< 1 hour each)
+- **Task Sizing**: Break large tasks into smaller, manageable subtasks
 
 # Task Delegation Patterns
 
