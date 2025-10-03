@@ -4,11 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Info
 
-**`kyldvs/k`** - kyldvs dotfiles
+- Name: `kyldvs/k`
+- Desc: kyldvs dotfiles and machine setup
 
 ## Principles
 
-**IMPORTANT:** Read [docs/principles.md](docs/principles.md) if you have not already. These principles must be followed in this repository.
+Read [docs/principles.md](docs/principles.md) if you have not already. These principles are important to follow.
 
 ## Code Style
 

@@ -1,7 +1,5 @@
 # Less but Better
 
-> **Note:** These are important principles in this repository that should always be followed.
-
 Software engineering principles inspired by Dieter Rams' design philosophy: "Weniger, aber besser" (Less, but better).
 
 Good design is not about adding features—it's about removing everything that doesn't serve a purpose. Every line of code is a liability. Every abstraction is a cost. The best solution is the one that solves the problem with the least complexity.
