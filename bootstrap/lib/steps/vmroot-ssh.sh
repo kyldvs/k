@@ -3,8 +3,10 @@ setup_ssh() {
   kd_step_start "ssh" "Setting up SSH keys"
 
   # Read config
-  local username=$(jq -r '.username' "$VMROOT_CONFIG_FILE")
-  local homedir=$(jq -r '.homedir' "$VMROOT_CONFIG_FILE")
+  local username
+  username=$(jq -r '.username' "$VMROOT_CONFIG_FILE")
+  local homedir
+  homedir=$(jq -r '.homedir' "$VMROOT_CONFIG_FILE")
   local ssh_dir="$homedir/.ssh"
   local auth_keys="$ssh_dir/authorized_keys"
 

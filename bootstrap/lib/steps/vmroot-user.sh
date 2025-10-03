@@ -3,8 +3,10 @@ create_user() {
   kd_step_start "user" "Creating user account"
 
   # Read config
-  local username=$(jq -r '.username' "$VMROOT_CONFIG_FILE")
-  local homedir=$(jq -r '.homedir' "$VMROOT_CONFIG_FILE")
+  local username
+  username=$(jq -r '.username' "$VMROOT_CONFIG_FILE")
+  local homedir
+  homedir=$(jq -r '.homedir' "$VMROOT_CONFIG_FILE")
 
   # Check if user already exists (idempotency)
   if id "$username" >/dev/null 2>&1; then
@@ -14,7 +16,8 @@ create_user() {
   fi
 
   # Create parent directory if needed
-  local parent_dir=$(dirname "$homedir")
+  local parent_dir
+  parent_dir=$(dirname "$homedir")
   if [ ! -d "$parent_dir" ]; then
     kd_log "Creating parent directory: $parent_dir"
     mkdir -p "$parent_dir"

@@ -29,7 +29,32 @@ lint-tracked:
 
 [no-cd]
 @lint-files *files:
+  just hooks _shellcheck {{files}}
   just hooks _ensure-newlines {{files}}
+
+[no-cd]
+_shellcheck *files:
+  #!/usr/bin/env bash
+  shfiles=()
+  # Built bootstrap scripts are excluded - we lint source files in bootstrap/lib/
+  exclude_patterns=("bootstrap/configure.sh" "bootstrap/termux.sh" "bootstrap/vmroot.sh" "bootstrap/vmroot-configure.sh")
+  for file in {{files}}; do
+    if [[ "$file" == *.sh ]]; then
+      excluded=false
+      for pattern in "${exclude_patterns[@]}"; do
+        if [[ "$file" == "$pattern" ]]; then
+          excluded=true
+          break
+        fi
+      done
+      if [[ "$excluded" == false ]]; then
+        shfiles+=("$file")
+      fi
+    fi
+  done
+  if [ ${#shfiles[@]} -gt 0 ]; then
+    shellcheck "${shfiles[@]}"
+  fi
 
 [no-cd]
 _ensure-newlines *files:

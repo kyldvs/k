@@ -17,7 +17,7 @@ kd_step_start() {
 }
 
 kd_step_end() {
-  if [ $KD_INDENT -gt 0 ]; then
+  if [ "$KD_INDENT" -gt 0 ]; then
     KD_INDENT=$((KD_INDENT - 1))
   fi
 
@@ -31,7 +31,7 @@ kd_step_end() {
 kd_step_skip() {
   local reason="$*"
 
-  if [ $KD_INDENT -gt 0 ]; then
+  if [ "$KD_INDENT" -gt 0 ]; then
     KD_INDENT=$((KD_INDENT - 1))
   fi
 

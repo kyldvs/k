@@ -72,7 +72,7 @@ kd_step_start() {
 }
 
 kd_step_end() {
-  if [ $KD_INDENT -gt 0 ]; then
+  if [ "$KD_INDENT" -gt 0 ]; then
     KD_INDENT=$((KD_INDENT - 1))
   fi
 
@@ -86,7 +86,7 @@ kd_step_end() {
 kd_step_skip() {
   local reason="$*"
 
-  if [ $KD_INDENT -gt 0 ]; then
+  if [ "$KD_INDENT" -gt 0 ]; then
     KD_INDENT=$((KD_INDENT - 1))
   fi
 
@@ -290,6 +290,7 @@ install_packages() {
   fi
 
   kd_log "Installing:$packages_needed"
+  # shellcheck disable=SC2086  # Intentional word splitting for multiple packages
   pkg install -y $packages_needed
 
   kd_step_end

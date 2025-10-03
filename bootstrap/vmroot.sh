@@ -78,7 +78,7 @@ kd_step_start() {
 }
 
 kd_step_end() {
-  if [ $KD_INDENT -gt 0 ]; then
+  if [ "$KD_INDENT" -gt 0 ]; then
     KD_INDENT=$((KD_INDENT - 1))
   fi
 
@@ -92,7 +92,7 @@ kd_step_end() {
 kd_step_skip() {
   local reason="$*"
 
-  if [ $KD_INDENT -gt 0 ]; then
+  if [ "$KD_INDENT" -gt 0 ]; then
     KD_INDENT=$((KD_INDENT - 1))
   fi
 
@@ -133,8 +133,10 @@ create_user() {
   kd_step_start "user" "Creating user account"
 
   # Read config
-  local username=$(jq -r '.username' "$VMROOT_CONFIG_FILE")
-  local homedir=$(jq -r '.homedir' "$VMROOT_CONFIG_FILE")
+  local username
+  username=$(jq -r '.username' "$VMROOT_CONFIG_FILE")
+  local homedir
+  homedir=$(jq -r '.homedir' "$VMROOT_CONFIG_FILE")
 
   # Check if user already exists (idempotency)
   if id "$username" >/dev/null 2>&1; then
@@ -144,7 +146,8 @@ create_user() {
   fi
 
   # Create parent directory if needed
-  local parent_dir=$(dirname "$homedir")
+  local parent_dir
+  parent_dir=$(dirname "$homedir")
   if [ ! -d "$parent_dir" ]; then
     kd_log "Creating parent directory: $parent_dir"
     mkdir -p "$parent_dir"
@@ -162,7 +165,8 @@ configure_sudo() {
   kd_step_start "sudo" "Configuring passwordless sudo"
 
   # Read config
-  local username=$(jq -r '.username' "$VMROOT_CONFIG_FILE")
+  local username
+  username=$(jq -r '.username' "$VMROOT_CONFIG_FILE")
   local sudoers_file="/etc/sudoers.d/vmroot-$username"
 
   # Check if sudoers file already exists (idempotency)
@@ -194,8 +198,10 @@ setup_ssh() {
   kd_step_start "ssh" "Setting up SSH keys"
 
   # Read config
-  local username=$(jq -r '.username' "$VMROOT_CONFIG_FILE")
-  local homedir=$(jq -r '.homedir' "$VMROOT_CONFIG_FILE")
+  local username
+  username=$(jq -r '.username' "$VMROOT_CONFIG_FILE")
+  local homedir
+  homedir=$(jq -r '.homedir' "$VMROOT_CONFIG_FILE")
   local ssh_dir="$homedir/.ssh"
   local auth_keys="$ssh_dir/authorized_keys"
 
@@ -244,7 +250,8 @@ main() {
   setup_ssh
 
   # Success message
-  local username=$(jq -r '.username' "$VMROOT_CONFIG_FILE")
+  local username
+  username=$(jq -r '.username' "$VMROOT_CONFIG_FILE")
   printf "\n%s✓ Bootstrap complete!%s\n" "$KD_GREEN" "$KD_RESET"
   printf "\nUser %s%s%s is now configured with:\n" "$KD_CYAN" "$username" "$KD_RESET"
   printf "  • Home directory\n"

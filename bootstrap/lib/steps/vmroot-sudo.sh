@@ -3,7 +3,8 @@ configure_sudo() {
   kd_step_start "sudo" "Configuring passwordless sudo"
 
   # Read config
-  local username=$(jq -r '.username' "$VMROOT_CONFIG_FILE")
+  local username
+  username=$(jq -r '.username' "$VMROOT_CONFIG_FILE")
   local sudoers_file="/etc/sudoers.d/vmroot-$username"
 
   # Check if sudoers file already exists (idempotency)

@@ -12,7 +12,8 @@ main() {
   setup_ssh
 
   # Success message
-  local username=$(jq -r '.username' "$VMROOT_CONFIG_FILE")
+  local username
+  username=$(jq -r '.username' "$VMROOT_CONFIG_FILE")
   printf "\n%s✓ Bootstrap complete!%s\n" "$KD_GREEN" "$KD_RESET"
   printf "\nUser %s%s%s is now configured with:\n" "$KD_CYAN" "$username" "$KD_RESET"
   printf "  • Home directory\n"

@@ -14,7 +14,8 @@ validate_vmroot_config() {
   fi
 
   # Validate home directory parent is writable
-  local parent_dir=$(dirname "$homedir")
+  local parent_dir
+  parent_dir=$(dirname "$homedir")
   if [ ! -d "$parent_dir" ] && [ ! -w "$(dirname "$parent_dir")" ]; then
     printf "%s[ERROR]%s Home directory parent is not writable: %s\n" \
       "$KD_RED" "$KD_RESET" "$parent_dir" >&2
