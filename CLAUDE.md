@@ -105,6 +105,7 @@ just test vmroot         # Run vmroot tests
 just vcs cm "msg"        # Commit with message
 just vcs push            # Push to remote
 just bootstrap build-all # Build all bootstrap scripts
+shellcheck script.sh     # Lint shell script
 ```
 
 ## Architecture Overview
@@ -131,6 +132,36 @@ just bootstrap build-all # Build all bootstrap scripts
 - Pre-commit: `just hooks pre-commit`
 - Managed through Husky
 - Auto-runs linting, tests before commit
+
+## Shellcheck Integration
+
+All shell scripts are linted with shellcheck to catch bugs and enforce best practices.
+
+### Pre-commit
+- Shellcheck runs automatically on staged `.sh` files
+- Commit blocked if violations found
+- Fix errors or add inline suppressions with rationale
+
+### Manual Linting
+```bash
+# Lint all source scripts
+find bootstrap/lib src/tests -name '*.sh' -exec shellcheck {} +
+
+# Lint specific file
+shellcheck path/to/script.sh
+```
+
+### Inline Suppressions
+For false positives or justified exceptions:
+```bash
+# shellcheck disable=SC2034  # Variable used in sourced context
+export MY_VAR="value"
+```
+
+### Common Issues
+- **SC2155**: Declare and assign separately: `local var; var=$(cmd)`
+- **SC2086**: Quote variables: `"$var"` not `$var`
+- **SC2006**: Use `$(cmd)` not `` `cmd` ``
 
 ## Justfile System
 
