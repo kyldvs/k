@@ -1,0 +1,20 @@
+set fallback := true
+set shell := ["bash", "-uc"]
+set ignore-comments
+
+[no-cd]
+@help:
+  just -f tasks/lint/justfile --list
+
+[no-cd]
+@_default: help
+
+[no-cd]
+@shellcheck:
+  just lint _shellcheck-all
+
+[no-cd]
+_shellcheck-all:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  shellcheck bootstrap/*.sh

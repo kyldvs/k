@@ -4,22 +4,15 @@
 # Enable all optional checks
 enable=all
 
-# Ignore sourced files without shebangs (bootstrap lib components)
-# Bootstrap lib files in bootstrap/lib/ are sourced, not executed directly
-disable=SC2148
-
-# Ignore unused variables (used in sourced/concatenated scripts)
-# Variables may be used in other sourced files or after concatenation
-disable=SC2034
-
-# Ignore variables referenced but not assigned (sourced from other files)
-# Color variables (KD_*) are sourced from colors.sh
-# Config variables are sourced from config-path.sh and vmroot-config-path.sh
-disable=SC2154
-
 # Severity threshold: ignore info/style, focus on warnings/errors
 # Style issues like SC2250, SC2292, SC2248 are noise - only show errors/warnings
 severity=warning
+
+# Compiled bootstrap script suppressions
+# Bootstrap scripts concatenate components - some variables defined for
+# consistency across all scripts but not used in every script
+disable=SC2034  # Unused variables (color variables, exports)
+disable=SC2154  # Variables referenced but not assigned (conditionally set)
 
 # Disable style-only checks that don't affect correctness
 disable=SC2250  # Braces around variables (stylistic)

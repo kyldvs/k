@@ -10,6 +10,7 @@ set ignore-comments
 
 mod bootstrap "tasks/bootstrap"
 mod hooks "tasks/hooks"
+mod lint "tasks/lint"
 mod test "tasks/test"
 mod vcs "tasks/vcs"
 
