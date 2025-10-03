@@ -1,0 +1,15 @@
+services:
+  vm-test:
+    image: k-test-vm
+    container_name: k-test-vm
+    build:
+      context: ../..
+      dockerfile: src/tests/images/vm/Dockerfile
+    volumes:
+      - ../../bootstrap:/var/www/bootstrap:ro
+      - ./lib:/test-lib:ro
+      - ./fixtures:/fixtures:ro
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536

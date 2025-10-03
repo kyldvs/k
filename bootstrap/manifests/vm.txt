@@ -1,0 +1,7 @@
+lib/utils/header-vm.sh
+lib/utils/colors.sh
+lib/utils/logging.sh
+lib/utils/retry.sh
+lib/utils/steps.sh
+lib/steps/git-config.sh
+lib/steps/vm-main.sh
