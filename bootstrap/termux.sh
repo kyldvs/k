@@ -53,6 +53,41 @@ kd_error() {
   printf "%s[ERROR]%s %s\n" "$KD_RED" "$KD_RESET" "$msg" >&2
 }
 
+kd_warning() {
+  local msg="$*"
+  printf "%s⚠ WARNING:%s %s\n" "$KD_YELLOW" "$KD_RESET" "$msg" >&2
+}
+
+kd_info() {
+  local msg="$*"
+  printf "%sℹ INFO:%s %s\n" "$KD_BLUE" "$KD_RESET" "$msg"
+}
+
+# Retry wrapper for transient failures
+# Usage: kd_retry command [args...]
+# Environment: KD_RETRY_MAX (default: 3), KD_RETRY_DELAY (default: 2)
+
+kd_retry() {
+  local max_attempts="${KD_RETRY_MAX:-3}"
+  local delay="${KD_RETRY_DELAY:-2}"
+  local attempt=1
+
+  while [ "$attempt" -le "$max_attempts" ]; do
+    if "$@"; then
+      return 0
+    fi
+
+    if [ "$attempt" -lt "$max_attempts" ]; then
+      kd_log "Retry $attempt/$max_attempts in ${delay}s..."
+      sleep "$delay"
+    fi
+    attempt=$((attempt + 1))
+  done
+
+  kd_error "Failed after $max_attempts attempts: $*"
+  return 1
+}
+
 # Step functions
 kd_step_start() {
   local step_name="$1"
@@ -291,7 +326,7 @@ install_packages() {
 
   kd_log "Installing:$packages_needed"
   # shellcheck disable=SC2086  # Intentional word splitting for multiple packages
-  pkg install -y $packages_needed
+  kd_retry pkg install -y $packages_needed
 
   kd_step_end
 }
@@ -452,7 +487,7 @@ EOF
 check_doppler_auth() {
   kd_step_start "doppler-auth" "Checking Doppler authentication"
 
-  if ! "$HOME/bin/doppler" me >/dev/null 2>&1; then
+  if ! kd_retry "$HOME/bin/doppler" me >/dev/null 2>&1; then
     kd_log ""
     kd_error "Doppler is not authenticated"
     kd_error ""
@@ -494,14 +529,14 @@ retrieve_ssh_keys() {
 
   # Fetch private key
   kd_log "Fetching private key: $ssh_key_private"
-  "$HOME/bin/doppler" secrets get "$ssh_key_private" --plain \
+  kd_retry "$HOME/bin/doppler" secrets get "$ssh_key_private" --plain \
     --project "$doppler_project" --config "$doppler_env" \
     > "$HOME/.ssh/gh_vm"
   chmod 600 "$HOME/.ssh/gh_vm"
 
   # Fetch public key
   kd_log "Fetching public key: $ssh_key_public"
-  "$HOME/bin/doppler" secrets get "$ssh_key_public" --plain \
+  kd_retry "$HOME/bin/doppler" secrets get "$ssh_key_public" --plain \
     --project "$doppler_project" --config "$doppler_env" \
     > "$HOME/.ssh/gh_vm.pub"
   chmod 644 "$HOME/.ssh/gh_vm.pub"

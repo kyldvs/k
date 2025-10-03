@@ -24,7 +24,7 @@ install_packages() {
 
   kd_log "Installing:$packages_needed"
   # shellcheck disable=SC2086  # Intentional word splitting for multiple packages
-  pkg install -y $packages_needed
+  kd_retry pkg install -y $packages_needed
 
   kd_step_end
 }

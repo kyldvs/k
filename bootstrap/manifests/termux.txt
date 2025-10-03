@@ -1,6 +1,7 @@
 lib/utils/header-termux.sh
 lib/utils/colors.sh
 lib/utils/logging.sh
+lib/utils/retry.sh
 lib/utils/steps.sh
 lib/utils/config-path.sh
 lib/steps/check-config.sh

@@ -29,6 +29,65 @@ else
   KD_BOLD=''
 fi
 
+# Indentation tracking
+KD_INDENT=0
+KD_CURRENT_STEP=""
+
+# Get current indentation string
+_kd_indent() {
+  i=0
+  while [ $i -lt $KD_INDENT ]; do
+    printf "  "
+    i=$((i + 1))
+  done
+}
+
+# Log functions
+kd_log() {
+  local msg="$*"
+  printf "%s%s\n" "$(_kd_indent)" "$msg"
+}
+
+kd_error() {
+  local msg="$*"
+  printf "%s[ERROR]%s %s\n" "$KD_RED" "$KD_RESET" "$msg" >&2
+}
+
+kd_warning() {
+  local msg="$*"
+  printf "%s⚠ WARNING:%s %s\n" "$KD_YELLOW" "$KD_RESET" "$msg" >&2
+}
+
+kd_info() {
+  local msg="$*"
+  printf "%sℹ INFO:%s %s\n" "$KD_BLUE" "$KD_RESET" "$msg"
+}
+
+# Retry wrapper for transient failures
+# Usage: kd_retry command [args...]
+# Environment: KD_RETRY_MAX (default: 3), KD_RETRY_DELAY (default: 2)
+
+kd_retry() {
+  local max_attempts="${KD_RETRY_MAX:-3}"
+  local delay="${KD_RETRY_DELAY:-2}"
+  local attempt=1
+
+  while [ "$attempt" -le "$max_attempts" ]; do
+    if "$@"; then
+      return 0
+    fi
+
+    if [ "$attempt" -lt "$max_attempts" ]; then
+      kd_log "Retry $attempt/$max_attempts in ${delay}s..."
+      sleep "$delay"
+    fi
+    attempt=$((attempt + 1))
+  done
+
+  kd_error "Failed after $max_attempts attempts: $*"
+  return 1
+}
+
 #!/usr/bin/env sh
 # Input validation functions for bootstrap configuration
 # All validators return 0 (valid) or 1 (invalid)

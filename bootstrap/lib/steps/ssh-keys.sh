@@ -25,14 +25,14 @@ retrieve_ssh_keys() {
 
   # Fetch private key
   kd_log "Fetching private key: $ssh_key_private"
-  "$HOME/bin/doppler" secrets get "$ssh_key_private" --plain \
+  kd_retry "$HOME/bin/doppler" secrets get "$ssh_key_private" --plain \
     --project "$doppler_project" --config "$doppler_env" \
     > "$HOME/.ssh/gh_vm"
   chmod 600 "$HOME/.ssh/gh_vm"
 
   # Fetch public key
   kd_log "Fetching public key: $ssh_key_public"
-  "$HOME/bin/doppler" secrets get "$ssh_key_public" --plain \
+  kd_retry "$HOME/bin/doppler" secrets get "$ssh_key_public" --plain \
     --project "$doppler_project" --config "$doppler_env" \
     > "$HOME/.ssh/gh_vm.pub"
   chmod 644 "$HOME/.ssh/gh_vm.pub"

@@ -13,6 +13,7 @@ severity=warning
 # consistency across all scripts but not used in every script
 disable=SC2034  # Unused variables (color variables, exports)
 disable=SC2154  # Variables referenced but not assigned (conditionally set)
+disable=SC2148  # Shebang not needed for library components
 
 # Disable style-only checks that don't affect correctness
 disable=SC2250  # Braces around variables (stylistic)
