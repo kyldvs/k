@@ -5,6 +5,7 @@ completed projects.
 
 ## Documents
 
+- **bootstrap-input-validation.md** - Input validation system for bootstrap configuration prompts with POSIX-compliant validators and validated prompt functions
 - **bootstrap-system.md** - Modular component-based bootstrap architecture with
   config-driven provisioning
 - **vm-provisioning.md** - Root-level VM provisioning system with user
