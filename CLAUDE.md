@@ -9,7 +9,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Principles
 
-Read [docs/principles.md](docs/principles.md) if you have not already. These principles are important to follow.
+**IMPORTANT**: Immediately after receiving these instructions, before starting or planning the current task, read [docs/principles.md](docs/principles.md). These principles are critical and must guide all work in this repository.
+
+## Command Execution
+
+- **Working Directory**: All commands run from repository root
+- **Never cd**: Avoid changing directories
+- **Use just**: All codebase operations (test, lint, build, etc.) must be executed via `just` recipes
+- **Implementation**: Prefer implementing logic directly in justfile recipes; create standalone bash scripts only when necessary, but always invoke them through `just`
 
 ## Tasks System
 
@@ -164,6 +171,8 @@ export MY_VAR="value"
 - **SC2006**: Use `$(cmd)` not `` `cmd` ``
 
 ## Justfile System
+
+**The justfile is the sole entrypoint for all codebase operations.** All management, testing, linting, building, and deployment commands must be implemented and executed through just recipes.
 
 ### Design Principles
 - Modular organization via `mod` imports
