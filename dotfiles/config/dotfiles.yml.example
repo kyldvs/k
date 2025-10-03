@@ -1,0 +1,39 @@
+# Dotfiles Configuration Example
+# Copy to ~/.config/kyldvs/k/dotfiles.yml and customize
+
+version: 1
+
+# Git identity management
+# Git will automatically use the correct identity based on directory path
+git_profiles:
+  - name: personal
+    path: ~/personal
+    user: "Your Name"
+    email: "you@personal.example.com"
+
+  - name: work
+    path: ~/work
+    user: "Your Name"
+    email: "you@work.example.com"
+
+# Package installation
+# Run: just k install-packages
+packages:
+  apt:
+    - zsh              # Z shell
+    - tmux             # Terminal multiplexer
+    - git              # Version control
+    - curl             # HTTP client
+    - wget             # File downloader
+    - stow             # Symlink manager (required for dotfiles)
+    - neovim           # Modern vim
+    - ripgrep          # Fast grep alternative
+    - fd-find          # Fast find alternative
+    - fzf              # Fuzzy finder
+    - bat              # Cat with syntax highlighting
+    - htop             # Process viewer
+    - tree             # Directory tree viewer
+    - jq               # JSON processor
+
+# Tool configurations (reserved for future use)
+tools: {}

@@ -1,0 +1,73 @@
+set fallback := true
+set shell := ["bash", "-uc"]
+
+# Dotfiles management commands
+# Less but better - simple, discoverable interface
+
+[no-cd]
+@setup:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  . lib/dotfiles/config.sh
+  . lib/dotfiles/stow.sh
+  . lib/dotfiles/git-identity.sh
+  echo "Setting up dotfiles..."
+  echo ""
+  df_config_load
+  echo ""
+  df_stow_link_all
+  echo ""
+  df_git_generate_includeif
+  echo ""
+  echo "Dotfiles setup complete!"
+  echo "Run 'just k status' to see configuration"
+
+[no-cd]
+@sync:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  . lib/dotfiles/stow.sh
+  echo "Syncing dotfiles..."
+  echo ""
+  df_stow_link_all
+  echo ""
+  echo "Dotfiles synced!"
+
+[no-cd]
+@install-packages dry_run="false":
+  #!/usr/bin/env bash
+  set -euo pipefail
+  . lib/dotfiles/packages.sh
+  if [ "{{dry_run}}" = "true" ]; then
+    df_pkg_install_from_config true
+  else
+    df_pkg_install_from_config false
+  fi
+
+[no-cd]
+@status:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  . lib/dotfiles/config.sh
+  . lib/dotfiles/stow.sh
+  . lib/dotfiles/git-identity.sh
+  echo ""
+  df_config_show
+  echo ""
+  df_stow_status
+  echo ""
+  df_git_show_status
+
+[no-cd]
+@packages:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  . lib/dotfiles/packages.sh
+  df_pkg_show_status
+
+[no-cd]
+@git-test path:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  . lib/dotfiles/git-identity.sh
+  df_git_test_identity "{{path}}"
