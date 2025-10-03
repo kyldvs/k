@@ -11,6 +11,82 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Read [docs/principles.md](docs/principles.md) if you have not already. These principles are important to follow.
 
+## Tasks System
+
+- Task files in `docs/tasks/` document planned work
+- Move completed tasks to `docs/tasks-done/`
+- Each task includes scope, success criteria, and implementation notes
+
+## Current Priorities
+
+Tasks are prioritized to align with "Less but Better" principles (see docs/principles.md).
+
+### High Priority
+
+1. **refactor-error-handling** - Fix principle #6 violations (honesty)
+   - Add retry logic for network operations
+   - Separate error types (error, warning, info)
+   - Wrap Doppler, pkg install, SSH operations in retry wrapper
+   - Est: 4-6 hours
+
+2. **vmroot-test-fixes** - Blocks CI integration
+   - Fix exit 255 issue in vmroot tests
+   - Required before enabling automated CI
+   - Est: 1-2 hours
+
+### Medium Priority
+
+3. **shellcheck-integration** - Automated code quality (quick win)
+   - Quick to implement, high value for principle #9 (sustainability)
+   - Pre-commit hook + CI integration
+   - Est: 2-3 hours
+
+4. **input-validation** - Improve principle #8 (thoroughness)
+   - Validate user inputs immediately at prompt time
+   - Add validators: hostname, port, username, directory
+   - Est: 2-3 hours
+
+5. **ci-integration** - Automated testing in GitHub Actions
+   - GitHub Actions workflow for automated test runs
+   - Depends on: vmroot-test-fixes
+   - Est: 2-3 hours
+
+### Low Priority
+
+6. **vm-user-bootstrap** - Complete VM setup
+   - Implement vm.sh (nvm, zsh, pnpm, corepack, tools)
+   - Large feature, non-urgent
+   - Est: 8-10 hours
+
+7. **vm-mosh-server** - Mosh server setup on VM
+   - Configure mosh-server for Termux → VM connection
+   - Est: 2-3 hours
+
+8. **termux-keyboard-config** - Keyboard layout configuration
+   - Custom keyboard layouts for Termux
+   - Est: 1-2 hours
+
+9. **task-management-cleanup** - Organizational hygiene
+   - Archive completed work, update task priorities
+   - Meta-work, improves maintainability
+   - Est: 1 hour
+
+### Completed
+
+- bootstrap-profile-init (see archive/docs/plan/)
+- modular-bootstrap (see archive/docs/plan/)
+- vm-root-bootstrap (see archive/docs/plan/)
+
+### Recommended Order
+
+1. shellcheck-integration (quick win, unblocks quality automation)
+2. refactor-error-handling (high value, fixes principle violations)
+3. input-validation (complements error handling)
+4. vmroot-test-fixes (unblocks CI)
+5. ci-integration (enables continuous quality)
+6. vm-user-bootstrap (completes the stack)
+7. Other features as needed
+
 ## Code Style
 
 - 80 char line limit (readability > density)
