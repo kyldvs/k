@@ -1,0 +1,15 @@
+services:
+  dotfiles-test:
+    image: k-test-dotfiles
+    container_name: k-test-dotfiles
+    build:
+      context: ../..
+      dockerfile: src/tests/images/dotfiles/Dockerfile
+    volumes:
+      - ../..:/var/www/k:ro
+      - ./lib:/test-lib:ro
+      - ./fixtures:/fixtures:ro
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536

@@ -146,6 +146,77 @@ curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/vm.sh | sh
 
 **Idempotent**: Safe to re-run, skips if already configured.
 
+## Dotfiles System
+
+After VM bootstrap, manage your user environment with the dotfiles system.
+
+### Quick Start
+
+```bash
+# Navigate to repository (if not already checked out)
+cd ~/kyldvs/k
+
+# Initial setup (one-time)
+just k setup
+
+# Install packages from config
+just k install-packages
+
+# Check status
+just k status
+```
+
+### What You Get
+
+- **Automatic Configuration**: Dotfiles linked via GNU Stow (symlinks)
+- **Instant Updates**: `git pull` updates dotfiles automatically
+- **Git Identity Management**: Directory-based identity switching (work vs personal)
+- **Package Management**: Declarative package installation via YAML
+- **Zero Maintenance**: Changes to dotfiles immediately visible
+
+### Configuration
+
+Configuration is stored in `~/.config/kyldvs/k/dotfiles.yml`:
+
+```yaml
+version: 1
+
+git_profiles:
+  - name: personal
+    path: ~/personal
+    user: "Your Name"
+    email: "you@personal.example.com"
+
+  - name: work
+    path: ~/work
+    user: "Your Name"
+    email: "you@work.example.com"
+
+packages:
+  apt:
+    - zsh
+    - tmux
+    - stow
+    - ripgrep
+    - fzf
+```
+
+### Commands
+
+| Command | Purpose |
+|---------|---------|
+| `just k setup` | Initial dotfiles setup (links files, configures git) |
+| `just k sync` | Re-link dotfiles (usually not needed) |
+| `just k install-packages` | Install APT packages from config |
+| `just k status` | Show configuration and status |
+| `just k git-test <path>` | Test git identity in directory |
+
+### Documentation
+
+- **[Complete User Guide](docs/dotfiles/README.md)** - Architecture, commands, troubleshooting
+- **[Configuration Reference](docs/dotfiles/configuration.md)** - YAML schema documentation
+- **[Migration Guide](docs/dotfiles/migration.md)** - Migrate from old integration tasks
+
 ## Complete Workflows
 
 ### Fresh Termux Setup

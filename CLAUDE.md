@@ -218,6 +218,9 @@ just bootstrap build-all        # Build all scripts
 - `kd_log/error` - Output helpers
 
 ## Usage
+
+### Bootstrap Scripts
+
 ```bash
 # One-time configuration (Termux)
 bash <(curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/configure.sh)
@@ -232,15 +235,122 @@ curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/vmroot-conf
 curl -fsSL https://raw.githubusercontent.com/kyldvs/k/main/bootstrap/vmroot.sh | sh
 ```
 
+### Dotfiles System
+
+After VM bootstrap, configure user environment with dotfiles:
+
+```bash
+# Initial setup (one-time, links dotfiles, configures git identity)
+just k setup
+
+# Install packages from YAML config
+just k install-packages
+
+# Check status
+just k status
+```
+
+# Dotfiles System
+
+Config-driven user environment management with GNU Stow.
+
+## Architecture
+Dotfiles system provides post-bootstrap user configuration:
+```
+dotfiles/              # Stow packages (linked to ~/)
+├── zsh/              # Zsh configuration
+├── tmux/             # Tmux configuration
+├── git/              # Git base configuration
+├── shell/            # Shell aliases
+└── config/           # Example configs
+
+lib/dotfiles/         # Bash libraries
+├── stow.sh          # Symlink management
+├── config.sh        # YAML config loader
+├── git-identity.sh  # Git identity via includeIf
+└── packages.sh      # Package installation
+
+tasks/k/justfile     # User-facing commands
+```
+
+## Commands
+```bash
+just k setup               # Initial setup (stow, git identity)
+just k sync                # Re-link dotfiles
+just k install-packages    # Install APT packages from YAML
+just k status              # Show config and link status
+just k packages            # Show package status
+just k git-test <path>     # Test git identity in directory
+```
+
+## Configuration
+**File**: `~/.config/kyldvs/k/dotfiles.yml`
+
+```yaml
+version: 1
+
+git_profiles:
+  - name: personal
+    path: ~/personal
+    user: "Your Name"
+    email: "you@personal.example.com"
+
+  - name: work
+    path: ~/work
+    user: "Your Name"
+    email: "you@work.example.com"
+
+packages:
+  apt:
+    - zsh
+    - tmux
+    - stow
+    - ripgrep
+
+tools: {}
+```
+
+## Git Identity Management
+Uses git-native includeIf directives for directory-based identity switching:
+
+1. Profile configs: `~/.config/git/<profile>.conf`
+2. includeIf directives appended to `~/.gitconfig`
+3. Git automatically switches identity by directory
+
+No custom tooling - pure git features (requires git >= 2.13).
+
+## Key Features
+- **Stow-based linking**: Symlinks from `dotfiles/` to `~/`
+- **Automatic updates**: `git pull` instantly updates dotfiles via symlinks
+- **YAML configuration**: Declarative setup for git profiles and packages
+- **Git-native identity**: includeIf directives, no custom scripts
+- **Conflict handling**: Backs up existing files to `~/.config/kyldvs/k/backups/`
+- **Idempotent**: Safe to re-run all commands
+
+## Testing
+Docker Compose tests validate all functionality:
+
+```bash
+just test dotfiles    # Run dotfiles tests
+```
+
+Coverage: fresh install, idempotency, git identity, packages, conflicts, YAML validation, sync after pull.
+
+## Documentation
+- `docs/dotfiles/README.md` - Complete user guide
+- `docs/dotfiles/configuration.md` - YAML schema reference
+- `docs/dotfiles/migration.md` - Migration from old tasks
+
 # Testing
 
-Docker Compose-based mobile tests validate bootstrap scripts with mocked dependencies.
+Docker Compose-based tests validate bootstrap and dotfiles with mocked dependencies.
 
 ```bash
 # Run tests
-just test all            # Run all tests (mobile + vmroot)
+just test all            # Run all tests (mobile + vmroot + dotfiles)
 just test mobile termux  # Explicit mobile test
 just test vmroot         # VM root bootstrap test
+just test dotfiles       # Dotfiles system test
 just test clean          # Cleanup containers/images
 
 # Test structure

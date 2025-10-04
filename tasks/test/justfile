@@ -7,6 +7,7 @@ all:
   @src/tests/run-mobile.sh termux
   @src/tests/run-vmroot.sh
   @src/tests/run-vm.sh
+  @src/tests/run-dotfiles.sh
 
 [no-cd]
 mobile platform="termux":
@@ -24,10 +25,16 @@ vm:
   @src/tests/run-vm.sh
 
 [no-cd]
+dotfiles:
+  @echo "Testing dotfiles system..."
+  @src/tests/run-dotfiles.sh
+
+[no-cd]
 clean:
   @echo "Cleaning up test containers and volumes..."
   @docker compose -f src/tests/docker-compose.mobile.yml -p k-mobile-test down -v 2>/dev/null || true
   @docker compose -f src/tests/docker-compose.vmroot.yml -p k-vmroot-test down -v 2>/dev/null || true
   @docker compose -f src/tests/docker-compose.vm.yml -p k-vm-test down -v 2>/dev/null || true
+  @docker compose -f src/tests/docker-compose.dotfiles.yml -p k-dotfiles-test down -v 2>/dev/null || true
   @docker ps -a --filter "name=k-test-*" -q | xargs -r docker rm -f 2>/dev/null || true
   @docker images -q "k-test-*" | xargs -r docker rmi -f 2>/dev/null || true

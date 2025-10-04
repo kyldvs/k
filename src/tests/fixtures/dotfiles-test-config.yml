@@ -1,0 +1,20 @@
+# Test configuration for dotfiles system
+version: 1
+
+# Git identity management test profiles
+git_profiles:
+  - name: personal
+    path: ~/personal
+    user: "Test User Personal"
+    email: "test@personal.example.com"
+
+  - name: work
+    path: ~/work
+    user: "Test User Work"
+    email: "test@work.example.com"
+
+# Minimal package list for testing
+packages:
+  apt:
+    - tree             # Small package for quick install test
+    - htop             # Another small package
